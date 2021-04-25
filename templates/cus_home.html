@@ -1,0 +1,34 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Welcome {{name}}</h1>
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+	<th>ID</th>
+	<th>Airline</th>
+	<th>Flight No.</th>
+	<th>Purchase Date</th>
+
+{% for line in posts %}
+	<tr>
+		<td>{{line['ID']}}</td>
+		<td>{{line['airline']}}</td>
+		<td>{{line['flight_number']}}</td>
+		<td>{{line['purchase_date']}}</td>
+	</tr>
+{% endfor %}
+</table>
+
+<a href="/logout">Logout</a>
+
+</body>
+
+
+</html>
