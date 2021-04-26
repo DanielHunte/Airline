@@ -3,6 +3,7 @@
 </head>
 <body>
 	<h1>Welcome {{name}}</h1>
+	<h2>Upcoming Flights</h2>
 
 <style type="text/css">
 	table, th, td{
@@ -11,17 +12,19 @@
 </style>
 
 <table>
-	<th>ID</th>
-	<th>Airline</th>
-	<th>Flight No.</th>
-	<th>Purchase Date</th>
+	<th>Flight No</th>
+	<th>Departure City</th>
+	<th>Arrival City</th>
+	<th>Departure Date</th>
+	<th>Arrival Date</th>
 
-{% for line in posts %}
+{% for line in data %}
 	<tr>
-		<td>{{line['ID']}}</td>
-		<td>{{line['airline']}}</td>
 		<td>{{line['flight_number']}}</td>
-		<td>{{line['purchase_date']}}</td>
+		<td>{{line['s.city']}}</td>
+		<td>{{line['t.city']}}</td>
+		<td>{{line['departure_date']}}</td>
+		<td>{{line['arrival_date']}}</td>
 	</tr>
 {% endfor %}
 </table>
