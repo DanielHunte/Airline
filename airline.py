@@ -16,7 +16,7 @@ conn = pymysql.connect(host='localhost',
 					   cursorclass=pymysql.cursors.DictCursor)
 
 #Define a route to hello function
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def hello():
 	return render_template('index.html')
 
@@ -99,9 +99,9 @@ def cus_home():
 	cursor.close()
 	return render_template('cus_home.html', name=name, data=data)
 
-@app.route('/flight_search', methods=['GET', 'POST'])
-def flight_search():
-	leaving = request.form['from']
+@app.route('/oneway', methods=['GET', 'POST'])
+def oneway():
+	leaving = request.form['leaving']
 	if len(leaving) != 3:
 		leaving = leaving.title()
 	else:
@@ -111,14 +111,68 @@ def flight_search():
 		to = to.title()
 	else:
 		to = to.upper()
-	date = request.form['date']
+	departure_date = request.form['departure_date']
 
 	cursor = conn.cursor()
-	query = '''SELECT * FROM flight_city WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s)'''
-	cursor.execute(query, (leaving, leaving, to, to))
+	query = '''SELECT * FROM flight_city WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s'''
+	cursor.execute(query, (leaving, leaving, to, to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
 	return render_template('flight_list.html', data=data)
+
+@app.route('/departing_trip', methods=['GET', 'POST'])
+def departing_trip():
+	leaving = request.form['leaving']
+	if len(leaving) != 3:
+		leaving = leaving.title()
+	else:
+		leaving = leaving.upper()
+	to = request.form['to']
+	if len(to) != 3:
+		to = to.title()
+	else:
+		to = to.upper()
+	departure_date = request.form['departure_date']
+	returning_date = request.form['returning_date']
+
+	print("Leaving: ", leaving)
+	print("To: ", to)
+	print("Departure date: ", departure_date)
+	print("Returning date: ", returning_date)
+
+	cursor = conn.cursor()
+	query = '''SELECT * FROM flight_city WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s'''
+	cursor.execute(query, (leaving, leaving, to, to, departure_date))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('departing_flight_list.html', data=data, leaving=leaving, to=to, returning_date=returning_date, departure_date=departure_date)
+
+@app.route('/returning_trip', methods=['GET', 'POST'])
+def returning_trip():
+	leaving = request.form['leaving']
+	if len(leaving) != 3:
+		leaving = leaving.title()
+	else:
+		leaving = leaving.upper()
+	to = request.form['to']
+	if len(to) != 3:
+		to = to.title()
+	else:
+		to = to.upper()
+	departure_date = request.form['departure_date']
+	returning_date = request.form['returning_date']
+
+	print("Leaving: ", leaving)
+	print("To: ", to)
+	print("Departure date: ", departure_date)
+	print("Returning date: ", returning_date)
+	
+	cursor = conn.cursor()
+	query = '''SELECT * FROM flight_city WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s'''
+	cursor.execute(query, (leaving, leaving, to, to, departure_date))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('returning_flight_list.html', data=data, to=leaving, leaving=to, departure_date=departure_date, returning_date=returning_date)
 
 @app.route('/flight_status', methods=['GET', 'POST'])
 def flight_status():

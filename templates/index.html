@@ -12,11 +12,13 @@
 	<a href="/staff_login">Airline Staff Login</a></br></br>
 
 	<h3>Flight Search</h3>
-	<form action="/flight_search" method="POST">
-		<input type="text" name = "from" placeholder="Leaving from" required/>
+	<form action="/oneway" method="POST">
+		<input type="text" name = "leaving" placeholder="Leaving from" required/>
 		<input type="text" name = "to" placeholder="Going to" required/>
-		<input type="text" name = "date" placeholder="Departure date" onfocus="(this.type='date')" required/></br></br>
-		<input type="submit" value = Search />
+		<input type="text" name = "departure_date" placeholder="Departing date" onfocus="(this.type='date')"/>
+		<input type="text" name = "returning_date" placeholder="Returning date" onfocus="(this.type='date')"/></br></br>
+		<input type="submit" value = "One Way"/>
+		<input type="submit" value = "Round Trip" formaction="/departing_trip"/>
 	</form>
 
 	<h3>Check Flight Status</h3>

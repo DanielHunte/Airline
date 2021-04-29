@@ -1,0 +1,41 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Departing Flights</h1>
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+	<th>Flight No</th>
+	<th>Leaving from</th>
+	<th>Going to</th>
+	<th>Departure Date</th>
+	<th>Arrival Date</th>
+
+{% for line in data %}
+	<tr>
+		<td>{{line['flight_number']}}</td>
+		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
+		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
+		<td>{{line['departure_date']}}</td>
+		<td>{{line['arrival_date']}}</td>
+	</tr>
+{% endfor %}
+</table><br>
+<form action="/returning_trip" method="post">
+    <button type="submit" class="btn-link">View Returning Flights</button>
+	<input type="hidden" name="leaving" value={{to}}>
+	<input type="hidden" name="to" value={{leaving}}>
+	<input type="hidden" name="departure_date" value={{returning_date}}>
+	<input type="hidden" name="returning_date" value={{departure_date}}>
+</form>
+
+</body>
+
+
+</html>
