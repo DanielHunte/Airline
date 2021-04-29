@@ -7,9 +7,26 @@
 
 <body>
 	<h1>Airline Ticket Reservation System</h1>
-	<a href="/cus_login">Customer</a> <br>
-	<a href="/agent_login">Agent</a> <br>
-	<a href="/staff_login">Airline Staff</a> <br>
+	<a href="/cus_login" style="margin-right: 20px">Customer Login</a>
+	<a href="/agent_login" style="margin-right: 20px">Agent Login</a>
+	<a href="/staff_login">Airline Staff Login</a></br></br>
+
+	<h3>Flight Search</h3>
+	<form action="/flight_search" method="POST">
+		<input type="text" name = "from" placeholder="Leaving from" required/>
+		<input type="text" name = "to" placeholder="Going to" required/>
+		<input type="text" name = "date" placeholder="Departure date" onfocus="(this.type='date')" required/></br></br>
+		<input type="submit" value = Search />
+	</form>
+
+	<h3>Check Flight Status</h3>
+	<form action="/flight_status" method="POST">
+		<input type="text" name = "airline" placeholder="Airline" required/>
+		<input type="text" name = "flight_number" placeholder="Flight Number" required/>
+		<input type="text" name = "arrival_date" placeholder="Arrival date" onfocus="(this.type='date')"/>
+		<input type="text" name = "departure_date" placeholder="Departure date" onfocus="(this.type='date')"/></br></br>
+		<input type="submit" value = Search />
+	</form>
 </body>
 
 </html>

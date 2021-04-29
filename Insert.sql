@@ -7,7 +7,7 @@ INSERT INTO airport
 VALUES ('JFK', 'New York City'),
        ('PVG', 'Shanghai'),
        ('MCO', 'Orlando'),
-       ('POS', 'Port of Spain');
+       ('POS', 'Port Of Spain');
 
 INSERT INTO customer
 VALUES ('djh459@nyu.edu','Daniel Hunte','hellothere',204,'Cleveland Street','Brooklyn','NY','18683541073','TB746352','2028/02/23','Trinidad and Tobago','1997/09/29'),

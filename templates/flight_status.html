@@ -2,8 +2,7 @@
 <head>
 </head>
 <body>
-	<h1>Welcome {{name}}</h1>
-	<h2>Upcoming Flights</h2>
+	<h1>Welcome</h1>
 
 <style type="text/css">
 	table, th, td{
@@ -13,23 +12,25 @@
 
 <table>
 	<th>Flight No</th>
-	<th>Departure City</th>
-	<th>Arrival City</th>
+	<th>Status</th>
+	<th>Leaving from</th>
+	<th>Going to</th>
 	<th>Departure Date</th>
 	<th>Arrival Date</th>
 
 {% for line in data %}
 	<tr>
 		<td>{{line['flight_number']}}</td>
-		<td>{{line['departure_city']}}</td>
-		<td>{{line['arrival_city']}}</td>
+		<td>{{line['status']}}</td>
+		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
+		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
 		<td>{{line['departure_date']}}</td>
 		<td>{{line['arrival_date']}}</td>
 	</tr>
 {% endfor %}
 </table>
 
-<a href="/logout">Logout</a>
+<a href="/">Go Back</a>
 
 </body>
 
