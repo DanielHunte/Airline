@@ -16,6 +16,7 @@
 	<th>Going to</th>
 	<th>Departure Date</th>
 	<th>Arrival Date</th>
+	<th>Price</th>
 
 {% for line in data %}
 	<tr>
@@ -24,6 +25,7 @@
 		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
 		<td>{{line['departure_date']}}</td>
 		<td>{{line['arrival_date']}}</td>
+		<td>${{'%0.2f' % line['base_price']|float}}</td>
 	</tr>
 {% endfor %}
 </table><br>

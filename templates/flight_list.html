@@ -2,7 +2,7 @@
 <head>
 </head>
 <body>
-	<h1>Welcome</h1>
+	<h1>Flights</h1>
 
 <style type="text/css">
 	table, th, td{
@@ -16,6 +16,7 @@
 	<th>Going to</th>
 	<th>Departure Date</th>
 	<th>Arrival Date</th>
+	<th>Price</th>
 
 {% for line in data %}
 	<tr>
@@ -24,11 +25,14 @@
 		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
 		<td>{{line['departure_date']}}</td>
 		<td>{{line['arrival_date']}}</td>
+		<td>${{'%0.2f' % line['base_price']|float}}</td>
 	</tr>
 {% endfor %}
-</table>
+</table><br>
 
-<a href="/">Go Back</a>
+<form>
+	<input type="submit" value = "Go home" formaction="/"/>
+</form>
 
 </body>
 

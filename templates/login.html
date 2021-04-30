@@ -5,15 +5,18 @@
 	<h1>{{header}}</h1>
 <form action="{{auth_url}}" method="POST">
 	<input type="text" name = "username" placeholder="{{placeholder}}" required/> </br>
-	<input type="password" name = "password" placeholder="password" required/></br>
+	<input type="password" name = "password" placeholder="password" required/><br></br>
 	<input type="submit" value = Login />
 	{% if error %}
 		<p class="error"><strong>Error:</strong> {{error}}</p>
 	{% endif %}
-</form>
-
-<a href="/">Go back</a>
-
+</form><br>
+<div>Don't have an account?
+	<form style="display: inline;">
+		<input type="submit" value = "Register" formaction="/cus_register"/><br></br>
+		<input type="submit" value = "Go home" formaction="/"/>
+	</form>
+</div>
 </body>
 
 

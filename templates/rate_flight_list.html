@@ -2,8 +2,7 @@
 <head>
 </head>
 <body>
-	<h1>Welcome {{name}}</h1>
-	<h2>Upcoming Flights</h2>
+	<h1>Past Trips</h1>
 
 <style type="text/css">
 	table, th, td{
@@ -13,27 +12,26 @@
 
 <table>
 	<th>Flight No</th>
-	<th>Departure City</th>
-	<th>Arrival City</th>
+	<th>Leaving from</th>
+	<th>Going to</th>
 	<th>Departure Date</th>
 	<th>Arrival Date</th>
+	<th>Price</th>
 
 {% for line in data %}
 	<tr>
 		<td>{{line['flight_number']}}</td>
-		<td>{{line['departure_city']}}</td>
-		<td>{{line['arrival_city']}}</td>
+		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
+		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
 		<td>{{line['departure_date']}}</td>
 		<td>{{line['arrival_date']}}</td>
+		<td>${{'%0.2f' % line['base_price']|float}}</td>
 	</tr>
 {% endfor %}
 </table><br>
 
 <form>
-	<input type="submit" value = "Rate Previous Flights" formaction="/rate_flight_list"/>
-</form>
-<form>
-	<input type="submit" value = "Go Home" formaction="/"/>
+	<input type="submit" value = "Go home" formaction="/"/>
 </form>
 
 </body>

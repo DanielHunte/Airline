@@ -9,9 +9,9 @@ VALUES ('JFK', 'New York City'),
        ('MCO', 'Orlando'),
        ('POS', 'Port Of Spain');
 
-INSERT INTO customer
-VALUES ('djh459@nyu.edu','Daniel Hunte','hellothere',204,'Cleveland Street','Brooklyn','NY','18683541073','TB746352','2028/02/23','Trinidad and Tobago','1997/09/29'),
-       ('lm3945@nyu.edu','Luiza Menezes','hardpassword',354,'Crescent Street','New York','NY','19176473387','TA764986','2025/06/02','United State of America','2000/04/17');
+INSERT INTO customer (email,name,password,building_number,street,city,state,phone_number,passport_number,passport_expiration,passport_country,date_of_birth)
+VALUES ('djh459@nyu.edu','Daniel Hunte',MD5('hellothere'),'204','Cleveland Street','Brooklyn','NY','18683541073','TB746352','2028/02/23','Trinidad and Tobago','1997/09/29'),
+       ('lm3945@nyu.edu','Luiza Menezes',MD5('hardpassword'),'354','Crescent Street','New York','NY','19176473387','TA764986','2025/06/02','United State of America','2000/04/17');
 
 INSERT INTO booking_agent
 VALUES ('elon@gmail.com','themartian','Emusk123');
