@@ -207,10 +207,10 @@ def rate_flight_list():
 		
 @app.route('/rate_flight_form', methods=['GET','POST'])
 def rate_flight_form():
-	flight_number = request.args.get("flight_number")
-	airline = request.args.get("airline")
-	departure_date = request.args.get("departure_date")
-	departure_time = request.args.get("departure_time")
+	flight_number = request.form['flight_number']
+	airline = request.form['airline']
+	departure_date = request.form['departure_date']
+	departure_time = request.form['departure_time']
 	return render_template('rate_flight_form.html', flight_number=flight_number, airline=airline, departure_date=departure_date, departure_time=departure_time)
 
 @app.route('/rate_flight', methods=['POST'])

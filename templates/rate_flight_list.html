@@ -27,7 +27,16 @@
 		<td>{{line['departure_date']}}</td>
 		<td>{{line['arrival_date']}}</td>
 		<td>${{'%0.2f' % line['base_price']|float}}</td>
-		<td><a href="/rate_flight_form?flight_number={{line['flight_number']}}&airline={{line['airline']}}&departure_date={{line['departure_date']}}&departure_time={{line['departure_time']}}">Rate</a></td>
+		<td>
+			<form action="/rate_flight_form" method="POST">
+				<button type="submit" class="btn-link">Rate</button>
+				<input type="hidden" name="flight_number" value="{{line['flight_number']}}">
+				<input type="hidden" name="airline" value="{{line['airline']}}">
+				<input type="hidden" name="departure_date" value="{{line['departure_date']}}">
+				<input type="hidden" name="departure_time" value="{{line['departure_time']}}">
+			</form>
+		</td>
+		<!--<td><a href="/rate_flight_form?flight_number={{line['flight_number']}}&airline={{line['airline']}}&departure_date={{line['departure_date']}}&departure_time={{line['departure_time']}}">Rate</a></td>-->
 	</tr>
 {% endfor %}
 </table><br>
