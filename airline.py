@@ -188,7 +188,6 @@ def registerAuth():
 def cus_home():
 	email = session['username']
 	cursor = conn.cursor()
-	#query1 = 'SELECT * FROM customer JOIN ticket NATURAL JOIN flight JOIN airport WHERE airport.name = flight.arrival_airport AND ticket.customer_email = customer.email AND customer_email = %s ORDER BY departure_date DESC'
 	query = 'SELECT * FROM customer JOIN ticket NATURAL JOIN flight_city WHERE ticket.customer_email = customer.email AND customer_email = %s AND departure_date > CURDATE() ORDER BY departure_date ASC'
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
@@ -196,22 +195,48 @@ def cus_home():
 	cursor.close()
 	return render_template('cus_home.html', name=name, data=data)
 
-@app.route('/rate_flight_list')
+@app.route('/rate_flight_list', methods=['GET', 'POST'])
 def rate_flight_list():
 	email = session['username']
 	cursor = conn.cursor()
-	#query1 = 'SELECT * FROM customer JOIN ticket NATURAL JOIN flight JOIN airport WHERE airport.name = flight.arrival_airport AND ticket.customer_email = customer.email AND customer_email = %s ORDER BY departure_date DESC'
-	query = 'SELECT * FROM customer JOIN ticket NATURAL JOIN flight_city WHERE ticket.customer_email = customer.email AND customer_email = %s AND departure_date < CURDATE() ORDER BY departure_date ASC'
+	query = 'SELECT * FROM customer JOIN ticket NATURAL JOIN flight_city WHERE customer.email = ticket.customer_email AND customer_email = %s AND departure_date < CURDATE() ORDER BY departure_date DESC'
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
-	name = data[0]['name']
 	cursor.close()
 	return render_template('rate_flight_list.html', data=data)
+		
+@app.route('/rate_flight_form', methods=['GET','POST'])
+def rate_flight_form():
+	flight_number = request.args.get("flight_number")
+	airline = request.args.get("airline")
+	departure_date = request.args.get("departure_date")
+	departure_time = request.args.get("departure_time")
+	return render_template('rate_flight_form.html', flight_number=flight_number, airline=airline, departure_date=departure_date, departure_time=departure_time)
+
+@app.route('/rate_flight', methods=['POST'])
+def rate_flight():
+	email = session['username']
+	flight_number = request.form['flight_number']
+	airline = request.form['airline']
+	departure_date = request.form['departure_date']
+	departure_time = request.form['departure_time']
+	rate = request.form['rate']
+	comment = request.form['comment']
+	cursor = conn.cursor()
+	ins = '''INSERT INTO rating (customer_email,flight_number,airline,departure_date,departure_time,rate,comment) 
+			 VALUES(%s,%s,%s,%s,%s,%s,%s)
+			 ON DUPLICATE KEY UPDATE rate=%s, comment=%s'''
+	cursor.execute(ins, (email,flight_number,airline,departure_date,departure_time,rate,comment,rate,comment))
+	conn.commit()
+	cursor.close()
+	return redirect('/rate_flight_list')
+
+
 @app.route('/logout')
 def logout():
 	session.pop('username')
 	return redirect('/')
-		
+
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask

@@ -17,6 +17,7 @@
 	<th>Departure Date</th>
 	<th>Arrival Date</th>
 	<th>Price</th>
+	<th></th>
 
 {% for line in data %}
 	<tr>
@@ -26,12 +27,13 @@
 		<td>{{line['departure_date']}}</td>
 		<td>{{line['arrival_date']}}</td>
 		<td>${{'%0.2f' % line['base_price']|float}}</td>
+		<td><a href="/rate_flight_form?flight_number={{line['flight_number']}}&airline={{line['airline']}}&departure_date={{line['departure_date']}}&departure_time={{line['departure_time']}}">Rate</a></td>
 	</tr>
 {% endfor %}
 </table><br>
 
 <form>
-	<input type="submit" value = "Go home" formaction="/"/>
+	<input type="submit" value = "Go back" formaction="/cus_home"/>
 </form>
 
 </body>

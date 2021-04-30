@@ -79,7 +79,7 @@ CREATE TABLE flight (
   flight_number varchar(11) NOT NULL,
   airline varchar(255) NOT NULL,
   departure_date date NOT NULL,
-  depature_time time (0) NOT NULL,
+  departure_time time (0) NOT NULL,
   departure_airport varchar(3) NOT NULL,
   arrival_airport varchar(3) NOT NULL,
   arrival_date date NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE flight (
   base_price double(255,2) NOT NULL,
   status varchar(255) NOT NULL,
   airplane_id varchar(11) NOT NULL,
-  PRIMARY KEY (flight_number,airline,departure_date,depature_time),
+  PRIMARY KEY (flight_number,airline,departure_date,departure_time),
   FOREIGN KEY (airline) REFERENCES airline (name),
   FOREIGN KEY (airplane_id) REFERENCES airplane (ID),
   FOREIGN KEY (departure_airport) REFERENCES airport (name),
@@ -125,8 +125,11 @@ CREATE TABLE ticket (
 --
 
 CREATE TABLE rating (
-  flight_number varchar(11) NOT NULL,
   customer_email varchar(255) NOT NULL,
+  flight_number varchar(11) NOT NULL,
+  airline varchar(255) NOT NULL,
+  departure_date date NOT NULL,
+  departure_time time (0) NOT NULL,
   comment varchar(255) NOT NULL,
   rate int(11) NOT NULL,
   PRIMARY KEY (flight_number,customer_email),
