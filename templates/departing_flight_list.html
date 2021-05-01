@@ -23,9 +23,9 @@
 		<td>{{line['flight_number']}}</td>
 		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
 		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
-		<td>{{line['departure_date']}}</td>
-		<td>{{line['arrival_date']}}</td>
-		<td>${{'%0.2f' % line['base_price']|float}}</td>
+		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
+		<td>${{'%0.2f' % line['sale_price']|float}}</td>
 	</tr>
 {% endfor %}
 </table><br>

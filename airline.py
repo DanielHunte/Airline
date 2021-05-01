@@ -35,7 +35,8 @@ def oneway():
 	departure_date = request.form['departure_date']
 
 	cursor = conn.cursor()
-	query = '''SELECT * FROM flight_city WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s'''
+	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s
+			   ORDER BY departure_date DESC,deaprture_time ASC'''
 	cursor.execute(query, (leaving, leaving, to, to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
@@ -57,7 +58,8 @@ def departing_trip():
 	returning_date = request.form['returning_date']
 
 	cursor = conn.cursor()
-	query = '''SELECT * FROM flight_city WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s'''
+	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s
+			   ORDER BY departure_date DESC,deaprture_time ASC'''
 	cursor.execute(query, (leaving, leaving, to, to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
@@ -79,7 +81,8 @@ def returning_trip():
 	returning_date = request.form['returning_date']
 	
 	cursor = conn.cursor()
-	query = '''SELECT * FROM flight_city WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s'''
+	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s
+			   ORDER BY departure_date DESC,deaprture_time ASC'''
 	cursor.execute(query, (leaving, leaving, to, to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
@@ -93,7 +96,7 @@ def flight_status():
 	departure_date = request.form['departure_date']
 
 	cursor = conn.cursor()
-	query = '''SELECT * FROM flight_city WHERE airline = %s AND flight_number = %s AND (arrival_date = %s OR departure_date = %s)'''
+	query = '''SELECT * FROM flight_expanded WHERE airline = %s AND flight_number = %s AND (arrival_date = %s OR departure_date = %s)'''
 	cursor.execute(query, (airline, flight_number, arrival_date, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
@@ -188,7 +191,8 @@ def registerAuth():
 def cus_home():
 	email = session['username']
 	cursor = conn.cursor()
-	query = 'SELECT * FROM customer JOIN ticket NATURAL JOIN flight_city WHERE ticket.customer_email = customer.email AND customer_email = %s AND departure_date > CURDATE() ORDER BY departure_date ASC'
+	query = '''SELECT * FROM customer JOIN ticket NATURAL JOIN flight_expanded WHERE ticket.customer_email = customer.email AND customer_email = %s AND departure_date > CURDATE()
+			 ORDER BY departure_date ASC,deaprture_time ASC'''
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
 	name = data[0]['name']
@@ -199,7 +203,8 @@ def cus_home():
 def rate_flight_list():
 	email = session['username']
 	cursor = conn.cursor()
-	query = 'SELECT * FROM customer JOIN ticket NATURAL JOIN flight_city WHERE customer.email = ticket.customer_email AND customer_email = %s AND departure_date < CURDATE() ORDER BY departure_date DESC'
+	query = '''SELECT * FROM customer JOIN ticket NATURAL JOIN flight_expanded WHERE customer.email = ticket.customer_email AND customer_email = %s AND departure_date < CURDATE()
+			   ORDER BY departure_date DESC,deaprture_time ASC'''
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
 	cursor.close()
@@ -223,10 +228,10 @@ def rate_flight():
 	rate = request.form['rate']
 	comment = request.form['comment']
 	cursor = conn.cursor()
-	ins = '''INSERT INTO rating (customer_email,flight_number,airline,departure_date,departure_time,rate,comment) 
-			 VALUES(%s,%s,%s,%s,%s,%s,%s)
+	ins = '''INSERT INTO rating (customer_email,flight_number,airline,rate,comment) 
+			 VALUES(%s,%s,%s,%s,%s)
 			 ON DUPLICATE KEY UPDATE rate=%s, comment=%s'''
-	cursor.execute(ins, (email,flight_number,airline,departure_date,departure_time,rate,comment,rate,comment))
+	cursor.execute(ins, (email,flight_number,airline,rate,comment,rate,comment))
 	conn.commit()
 	cursor.close()
 	return redirect('/rate_flight_list')
@@ -243,10 +248,20 @@ app.secret_key = 'some key that you will never guess'
 #for changes to go through, TURN OFF FOR PRODUCTION
 if __name__ == "__main__":
 	cursor = conn.cursor()
-	query = '''CREATE VIEW IF NOT EXISTS flight_city AS
-				SELECT *
-				FROM flight JOIN (SELECT name AS departure_airport_name, city AS departure_city FROM airport) as s JOIN (SELECT name AS arrival_airport_name, city AS arrival_city FROM airport) as t
-				WHERE departure_airport = s.departure_airport_name AND arrival_airport = t.arrival_airport_name'''
+	query = '''CREATE VIEW IF NOT EXISTS flight_expanded AS
+					WITH flight_city AS
+						(SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price
+						FROM flight JOIN (SELECT name AS departure_airport_name, city AS departure_city FROM airport) as s JOIN (SELECT name AS arrival_airport_name, city AS arrival_city FROM airport) as t
+						WHERE departure_airport = s.departure_airport_name AND arrival_airport = t.arrival_airport_name)
+						,
+						flight_size AS
+						(SELECT flight_number as flight_num,airline AS airl,COUNT(*) as number_of_passengers
+						FROM ticket NATURAL JOIN flight
+						GROUP BY flight_number,airline)
+
+					SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price,IF(number_of_passengers < 0.7*number_of_seats, base_price, 1.2*base_price) AS sale_price,number_of_seats,number_of_passengers
+						FROM (SELECT * FROM flight_city AS s JOIN (SELECT ID,airline AS al,number_of_seats FROM airplane) AS t ON (s.airplane_ID = t.ID AND s.airline = t.al)) AS u JOIN flight_size
+						ON (flight_size.flight_num = u.flight_number AND flight_size.airl = u.airline)'''
 	cursor.execute(query)
 	cursor.close()
 

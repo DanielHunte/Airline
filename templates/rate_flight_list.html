@@ -16,7 +16,6 @@
 	<th>Going to</th>
 	<th>Departure Date</th>
 	<th>Arrival Date</th>
-	<th>Price</th>
 	<th></th>
 
 {% for line in data %}
@@ -24,9 +23,8 @@
 		<td>{{line['flight_number']}}</td>
 		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
 		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
-		<td>{{line['departure_date']}}</td>
-		<td>{{line['arrival_date']}}</td>
-		<td>${{'%0.2f' % line['base_price']|float}}</td>
+		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
 		<td>
 			<form action="/rate_flight_form" method="POST">
 				<button type="submit" class="btn-link" >Rate</button>
