@@ -101,13 +101,13 @@ CREATE TABLE flight (
 --
 
 CREATE TABLE ticket (
-  ID varchar(5) NOT NULL,
-  airline varchar(255) NOT NULL,
+  ID int NOT NULL AUTO_INCREMENT,
   flight_number varchar(11) NOT NULL,
+  airline varchar(255) NOT NULL,
   customer_email varchar(255) NOT NULL,
   sold_price double(255,2) NOT NULL,
   card_type varchar(255) NOT NULL,
-  card_number varchar(11) NOT NULL,
+  card_number varchar(19) NOT NULL,
   name_on_card varchar(255) NOT NULL,
   expiration_date date NOT NULL,
   purchase_date date NOT NULL,
@@ -142,7 +142,7 @@ CREATE TABLE rating (
 --
 
 CREATE TABLE agent_purchase (
-  ticket_id varchar(5) NOT NULL,
+  ticket_id int NOT NULL,
   agent_email varchar(255) NOT NULL,
   customer_email varchar(255) NOT NULL,
   PRIMARY KEY (ticket_id,agent_email,customer_email),
@@ -175,7 +175,7 @@ CREATE TABLE airline_staff (
 --
 
 CREATE TABLE cus_purchase (
-  ticket_id varchar(5) NOT NULL,
+  ticket_id int NOT NULL,
   customer_email varchar(255) NOT NULL,
   PRIMARY KEY (ticket_id,customer_email),
   FOREIGN KEY (customer_email) REFERENCES customer (email),

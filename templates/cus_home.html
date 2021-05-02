@@ -31,9 +31,18 @@
 
 <form>
 	<input type="submit" value = "Rate Previous Flights" formaction="/rate_flight_list"/>
-</form>
+</form><br>
+<h3>Flight Search</h3>
+	<form action="/oneway_purchase" method="POST">
+		<input type="text" name = "leaving" placeholder="Leaving from" required/>
+		<input type="text" name = "to" placeholder="Going to" required/>
+		<input type="text" name = "departure_date" placeholder="Departing date" onfocus="(this.type='date')"/>
+		<input type="text" name = "returning_date" placeholder="Returning date" onfocus="(this.type='date')"/></br></br>
+		<input type="submit" value = "One Way"/>
+		<input type="submit" value = "Round Trip" formaction="/departing_trip_cus"/>
+	</form>
 <form>
-	<input type="submit" value = "Go Home" formaction="/"/>
+	<input type="submit" value = "Logout" formaction="/logout"/>
 </form>
 
 </body>
