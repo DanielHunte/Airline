@@ -245,7 +245,7 @@ def purchase_ticket():
 	expiration_date = request.form['expiration_date']
 
 	cursor = conn.cursor()
-	query = '''SELECT *
+	query = '''SELECT sale_price
 			   FROM flight_expanded
 			   WHERE (flight_number,airline) = (%s,%s)'''
 	cursor.execute(query,(flight_number, airline))
@@ -254,10 +254,11 @@ def purchase_ticket():
 	ins1 = '''INSERT INTO ticket(flight_number,airline,customer_email,sold_price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time)
 			   VALUES(%s,%s,%s,%s,%s,%s,%s,%s,CURDATE(),CURTIME())'''
 	cursor.execute(ins1,(flight_number,airline,email,data['sale_price'],card_type,card_number,name_on_card,expiration_date))
-	
+
 	ins2 = '''INSERT INTO cus_purchase(ticket_id,customer_email)
 			   VALUES(LAST_INSERT_ID(),%s)'''
 	cursor.execute(ins2,(email))
+	conn.commit()
 	cursor.close()
 	return redirect("/cus_home")
 
