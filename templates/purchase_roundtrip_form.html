@@ -1,0 +1,31 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Purchasing Ticket</h1>
+<form action="/purchase_roundtrip_ticket" method="POST">
+	<input type="text" name = "card_type" placeholder="Card Type"/></br>
+	<input type="text" name = "card_number" placeholder="Card Number"/></br>
+	<input type="text" name = "name_on_card" placeholder="Name on Card"/></br>
+	<input type="text" name = "expiration_date" placeholder="Expiration Date" onfocus="(this.type='date')"/></br>
+    <input type="hidden" name="departure_flight_number" value="{{departure_flight_number}}">
+    <input type="hidden" name="departure_airline" value="{{departure_airline}}">
+	<input type="hidden" name="departure_date" value="{{departure_date}}">
+	<input type="hidden" name="departure_price" value="{{departure_price}}">
+	<input type="hidden" name="returning_flight_number" value="{{returning_flight_number}}">
+    <input type="hidden" name="returning_airline" value="{{returning_airline}}">
+	<input type="hidden" name="returning_price" value="{{returning_price}}">
+
+	<input type="hidden" name="returning_from" value="{{returning_from}}">
+	<input type="hidden" name="returning_to" value="{{returning_to}}">
+	<input type="hidden" name="returning_date" value="{{returning_date}}">
+
+	<h2>Total: ${{'%0.2f' % total|float}}</h2>
+	<input type="submit" value = "Complete Booking" /><br><br>
+    <input type="submit" value = "Go back" formaction="/returning_trip_purchase"/>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form><br>
+</body>
+</html>

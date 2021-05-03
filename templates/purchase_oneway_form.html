@@ -3,7 +3,7 @@
 </head>
 <body>
 	<h1>Purchasing Ticket</h1>
-<form action="/purchase_ticket" method="POST">
+<form action="/purchase_oneway_ticket" method="POST">
 	<input type="text" name = "card_type" placeholder="Card Type"/></br>
 	<input type="text" name = "card_number" placeholder="Card Number"/></br>
 	<input type="text" name = "name_on_card" placeholder="Name on Card"/></br>
@@ -13,6 +13,8 @@
     <input type="hidden" name="leaving" value="{{data['departure_airport']}}">
     <input type="hidden" name="to" value="{{data['arrival_airport']}}"><br>
     <input type="hidden" name="departure_date" value="{{data['departure_date']}}"><br>
+	<input type="hidden" name="total" value="{{data['sale_price']}}"><br>
+	<h2>Total: ${{'%0.2f' % data['sale_price']|float}}</h2>
 	<input type="submit" value = "Complete Booking" /><br><br>
     <input type="submit" value = "Go back" formaction="/oneway_purchase"/>
 	{% if error %}

@@ -1,0 +1,48 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Flights</h1>
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+	<th>Flight No</th>
+	<th>Leaving from</th>
+	<th>Going to</th>
+	<th>Departure Date</th>
+	<th>Arrival Date</th>
+	<th>Price</th>
+	<th></th>
+
+{% for line in data %}
+	<tr>
+		<td>{{line['flight_number']}}</td>
+		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
+		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
+		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
+		<td>${{'%0.2f' % line['sale_price']|float}}</td>
+		<td>
+			<form action="/purchase_oneway_form" method="POST">
+				<button type="submit" class="btn-link" >Select</button>
+				<input type="hidden" name="flight_number" value="{{line['flight_number']}}">
+				<input type="hidden" name="airline" value="{{line['airline']}}">
+			</form>
+		</td>
+	</tr>
+{% endfor %}
+</table><br>
+
+<form>
+	<input type="submit" value = "Go back" formaction="/cus_home"/>
+</form>
+
+</body>
+
+
+</html>

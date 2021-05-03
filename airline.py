@@ -36,7 +36,7 @@ def oneway():
 
 	cursor = conn.cursor()
 	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s AND number_of_passengers < number_of_seats
-			   ORDER BY departure_date DESC,departure_time ASC'''
+			   ORDER BY departure_time ASC'''
 	cursor.execute(query, (leaving, leaving, to, to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
@@ -59,7 +59,7 @@ def departing_trip():
 
 	cursor = conn.cursor()
 	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s AND number_of_passengers < number_of_seats
-			   ORDER BY departure_date DESC,departure_time ASC'''
+			   ORDER BY departure_time ASC'''
 	cursor.execute(query, (leaving, leaving, to, to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
@@ -82,7 +82,7 @@ def returning_trip():
 	
 	cursor = conn.cursor()
 	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s AND number_of_passengers < number_of_seats
-			   ORDER BY departure_date DESC,departure_time ASC'''
+			   ORDER BY departure_time ASC'''
 	cursor.execute(query, (leaving, leaving, to, to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
@@ -200,30 +200,30 @@ def cus_home():
 	return render_template('cus_home.html', name=name, data=data)
 
 
-@app.route('/oneway_purchase', methods=['GET', 'POST'])
-def oneway_cus():
-	leaving = request.form['leaving']
-	if len(leaving) != 3:
-		leaving = leaving.title()
+@app.route('/purchase_oneway_list', methods=['GET', 'POST'])
+def purchase_oneway_list():
+	departing_from = request.form['departing_from']
+	if len(departing_from) != 3:
+		departing_from = departing_from.title()
 	else:
-		leaving = leaving.upper()
-	to = request.form['to']
-	if len(to) != 3:
-		to = to.title()
+		departing_from = departing_from.upper()
+	departing_to = request.form['departing_to']
+	if len(departing_to) != 3:
+		departing_to = departing_to.title()
 	else:
-		to = to.upper()
+		departing_to = departing_to.upper()
 	departure_date = request.form['departure_date']
 
 	cursor = conn.cursor()
 	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s AND number_of_passengers < number_of_seats
-			   ORDER BY departure_date DESC,departure_time ASC'''
-	cursor.execute(query, (leaving, leaving, to, to, departure_date))
+			   ORDER BY departure_time ASC'''
+	cursor.execute(query, (departing_from, departing_from, departing_to, departing_to, departure_date))
 	data = cursor.fetchall()
 	cursor.close()
-	return render_template('flight_list_purchase.html', data=data)
+	return render_template('purchase_oneway_list.html', data=data)
 
-@app.route('/purchase_form', methods=['GET', 'POST'])
-def purchase_form():
+@app.route('/purchase_oneway_form', methods=['GET', 'POST'])
+def purchase_oneway_form():
 	flight_number = request.form['flight_number']
 	airline = request.form['airline']
 	query = '''SELECT * FROM flight_expanded WHERE flight_number = %s AND airline = %s'''
@@ -231,10 +231,10 @@ def purchase_form():
 	cursor.execute(query, (flight_number,airline))
 	data = cursor.fetchone()
 	cursor.close()
-	return render_template("purchase_form.html", data=data)
+	return render_template("purchase_oneway_form.html", data=data)
 
-@app.route('/purchase_ticket', methods=['GET', 'POST'])
-def purchase_ticket():
+@app.route('/purchase_oneway_ticket', methods=['GET', 'POST'])
+def purchase_oneway_ticket():
 	airline = request.form['airline']
 	flight_number = request.form['flight_number']
 	email = session['username']
@@ -243,21 +243,116 @@ def purchase_ticket():
 	card_number = request.form['card_number']
 	name_on_card = request.form['name_on_card']
 	expiration_date = request.form['expiration_date']
+	sold_price = request.form['total']
 
 	cursor = conn.cursor()
-	query = '''SELECT sale_price
-			   FROM flight_expanded
-			   WHERE (flight_number,airline) = (%s,%s)'''
-	cursor.execute(query,(flight_number, airline))
-	data = cursor.fetchone()
-
 	ins1 = '''INSERT INTO ticket(flight_number,airline,customer_email,sold_price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time)
 			   VALUES(%s,%s,%s,%s,%s,%s,%s,%s,CURDATE(),CURTIME())'''
-	cursor.execute(ins1,(flight_number,airline,email,data['sale_price'],card_type,card_number,name_on_card,expiration_date))
+	cursor.execute(ins1,(flight_number,airline,email,sold_price,card_type,card_number,name_on_card,expiration_date))
 
 	ins2 = '''INSERT INTO cus_purchase(ticket_id,customer_email)
 			   VALUES(LAST_INSERT_ID(),%s)'''
 	cursor.execute(ins2,(email))
+	conn.commit()
+	cursor.close()
+	return redirect("/cus_home")
+
+@app.route('/departing_trip_purchase', methods=['GET', 'POST'])
+def departing_trip_purchase():
+	departing_from = request.form['departing_from']
+	if len(departing_from) != 3:
+		departing_from = departing_from.title()
+	else:
+		departing_to = departing_from.upper()
+	departing_to = request.form['departing_to']
+	if len(departing_to) != 3:
+		departing_to = departing_to.title()
+	else:
+		departing_to = departing_to.upper()
+	departure_date = request.form['departure_date']
+	returning_date = request.form['returning_date']
+
+	cursor = conn.cursor()
+	query = '''SELECT * FROM flight_expanded WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s OR arrival_city = %s) AND departure_date = %s AND number_of_passengers < number_of_seats
+			   ORDER BY departure_time ASC'''
+	cursor.execute(query, (departing_from, departing_from, departing_to, departing_to, departure_date))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('departing_trip_purchase.html', data=data, returning_date=returning_date)
+
+@app.route('/returning_trip_purchase', methods=['GET', 'POST'])
+def returning_trip_purchase():
+	departure_flight_number = request.form['departure_flight_number']
+	departure_airline = request.form['departure_airline']
+	print("departure_flight_number",departure_flight_number)
+	departure_price = request.form['departure_price']
+	departure_date = request.form['departure_date']
+
+
+	returning_from = request.form['returning_from']
+	returning_to = request.form['returning_to']
+	returning_date = request.form['returning_date']
+
+	cursor = conn.cursor()
+	query = '''SELECT * FROM flight_expanded WHERE departure_airport = %s AND arrival_airport = %s AND departure_date = %s AND number_of_passengers < number_of_seats
+			   ORDER BY departure_time ASC'''
+	cursor.execute(query, (returning_from, returning_to, returning_date))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('returning_trip_purchase.html', data=data, departure_flight_number=departure_flight_number, departure_airline=departure_airline, departure_price=departure_price, departure_date=departure_date)
+
+@app.route('/purchase_roundtrip_form', methods=['GET', 'POST'])
+def purchase_roundtrip_form():
+	departure_flight_number = request.form['departure_flight_number']
+	departure_airline = request.form['departure_airline']
+	departure_date = request.form['departure_date']
+	print("departure_flight_number",departure_flight_number)
+	departure_price = request.form['departure_price']
+
+	returning_flight_number = request.form['returning_flight_number']
+	returning_airline = request.form['returning_airline']
+	returning_price = request.form['returning_price']
+
+	returning_from = request.form['returning_from']
+	returning_to = request.form['returning_to']
+	returning_date = request.form['returning_date']
+
+	total = str(float(departure_price) + float(returning_price))
+
+	return render_template('purchase_roundtrip_form.html', departure_flight_number=departure_flight_number, departure_airline=departure_airline, departure_date=departure_date, returning_flight_number=returning_flight_number, returning_airline=returning_airline, departure_price=departure_price, returning_price=returning_price, total=total, returning_from=returning_from, returning_to=returning_to, returning_date=returning_date)
+
+@app.route('/purchase_roundtrip_ticket', methods=['GET', 'POST'])
+def purchase_roundtrip_ticket():
+	departure_flight_number = request.form['departure_flight_number']
+	print("departure_flight_number",departure_flight_number)
+	departure_airline = request.form['departure_airline']
+	departure_price = request.form['departure_price']
+	returning_flight_number = request.form['returning_flight_number']
+	returning_airline = request.form['returning_airline']
+	returning_price = request.form['returning_price']
+	
+	email = session['username']
+
+	card_type = request.form['card_type']
+	card_number = request.form['card_number']
+	name_on_card = request.form['name_on_card']
+	expiration_date = request.form['expiration_date']
+
+	cursor = conn.cursor()
+	ins1 = '''INSERT INTO ticket(flight_number,airline,customer_email,sold_price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time)
+			   VALUES(%s,%s,%s,%s,%s,%s,%s,%s,CURDATE(),CURTIME())'''
+	cursor.execute(ins1,(departure_flight_number,departure_airline,email,departure_price,card_type,card_number,name_on_card,expiration_date))
+	ins2 = '''INSERT INTO cus_purchase(ticket_id,customer_email)
+			   VALUES(LAST_INSERT_ID(),%s)'''
+	cursor.execute(ins2,(email))
+	
+	ins3 = '''INSERT INTO ticket(flight_number,airline,customer_email,sold_price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time)
+			   VALUES(%s,%s,%s,%s,%s,%s,%s,%s,CURDATE(),CURTIME())'''
+	cursor.execute(ins3,(returning_flight_number,returning_airline,email,returning_price,card_type,card_number,name_on_card,expiration_date))
+	ins4 = '''INSERT INTO cus_purchase(ticket_id,customer_email)
+			   VALUES(LAST_INSERT_ID(),%s)'''
+	cursor.execute(ins4,(email))
+	
 	conn.commit()
 	cursor.close()
 	return redirect("/cus_home")
