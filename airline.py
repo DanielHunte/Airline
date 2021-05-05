@@ -1,7 +1,8 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
+from datetime import date
+import json
 import pymysql.cursors
-import sys
 
 
 #Initialize the app from Flask
@@ -390,6 +391,38 @@ def rate_flight():
 	cursor.close()
 	return redirect('/rate_flight_list')
 
+@app.route('/track_spending', methods=['GET', 'POST'])
+def track_spending():
+	email = session['username']
+	start_date = request.form['start_date']
+	end_date = request.form['end_date']
+
+	if start_date == '':
+		today = date.today()
+		end_date = today.strftime("%Y-%m-%d")
+
+		one_year_ago = date(today.year - 1, today.month, today.day)
+		start_date = one_year_ago.strftime("%Y-%m-%d")
+
+	cursor = conn.cursor()
+	query1 = '''SELECT IFNULL(SUM(sold_price),0) AS total
+			   FROM ticket
+			   WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s'''
+	cursor.execute(query1, (email,start_date,end_date))
+	total = cursor.fetchone()
+	
+	query2 = '''SELECT YEAR(purchase_date) AS year, MONTH(purchase_date) AS month, SUM(sold_price) AS total
+				FROM ticket
+				WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s
+				GROUP BY YEAR(purchase_date), MONTH(purchase_date)
+				ORDER BY YEAR(purchase_date), MONTH(purchase_date)'''
+	cursor.execute(query2, (email,start_date,end_date))
+	data = cursor.fetchall()
+	result = []
+	for line in data:
+		result.append([str(line['year']) + "/" + str(line['month']), line['total']])
+	cursor.close()
+	return render_template('track_spending.html', result=result, total=total['total'], start_date=start_date, end_date=end_date)
 
 @app.route('/logout')
 def logout():

@@ -29,8 +29,13 @@
 {% endfor %}
 </table><br>
 
-<form>
-	<input type="submit" value = "Rate Previous Flights" formaction="/rate_flight_list"/>
+<form action="/rate_flight_list" method="POST" style='display:inline;'>
+	<input type="submit" value = "Rate Previous Flights"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</form>
+<form action="/track_spending" method="POST" style='display:inline;'>
+	<input type="submit" value = "Track Spending"/>
+	<input type="hidden" id="start_date" name="start_date">
+	<input type="hidden" id="end_date" name="end_date">
 </form><br>
 <h3>Flight Search</h3>
 	<form action="/purchase_oneway_list" method="POST">

@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script>
+            google.charts.load('current', {packages: ['corechart', 'bar']});
+            google.charts.setOnLoadCallback(drawBasic);
+
+            function drawBasic() {
+
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Month');
+                data.addColumn('number', 'Motivation Level');
+                
+                var result = JSON.parse('{{result}}'.split("&#39;").join('"'));
+                data.addRows(result);
+                
+                var options = {
+                    legend: 'none',
+                    width: 500,
+                    height: 300,
+                    bar: {groupWidth: '75%'},
+                    hAxis: {
+                        title: 'Month',
+                        format: 'h:mm a',
+                    },
+                    vAxis: {
+                        title: 'Money Spent',
+                        format: 'currency'
+                    }
+                };
+
+                var chart = new google.visualization.ColumnChart(
+                    document.getElementById('chart_div'));
+
+                chart.draw(data, options);
+                }
+        </script>  
+    </head>
+    <body>
+        <h1>Track Your Spending</h1><br>
+        <form action="/track_spending" method="POST">
+            <input type="text" id="start_date" name = "start_date" placeholder="From" required onfocus="(this.type='date')"/>
+            <input type="text" id="end_date" name = "end_date" placeholder="To" required onfocus="(this.type='date')"/>
+            <input type="submit" value = "Search"/>
+        </form><br>
+        
+        <h2>From {{start_date}} to {{end_date}}</h2>
+        <h3>Total amount spent is ${{'%0.2f' % total|float}}</h3>
+        <div id="chart_div"></div>
+        <form>
+            <input type="submit" value = "Go back" formaction="/cus_home"/>
+        </form>
+    </body>
+</html>
