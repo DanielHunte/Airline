@@ -139,6 +139,29 @@ def cus_login_auth():
 		error = 'Invalid login or email'
 		return render_template('login.html', error=error, placeholder="email", header="Customer Login")
 
+#Authenticates the airline staff login
+@app.route('/astaff_login_auth', methods=['GET', 'POST'])
+def astaff_login_auth():
+	username = request.form['username']
+	password = request.form['password']
+	airline = request.form['airline']
+	cursor = conn.cursor()
+	query = 'SELECT * FROM airline_staff WHERE username = %s and password = MD5(%s)'
+	cursor.execute(query, (email, password))
+	data = cursor.fetchone()
+	cursor.close()
+	error = None
+	if(data):
+		#creates a session for the the airline staff
+		#session is a built in
+		session['username'] = username
+		return redirect(url_for('astaff_home'))
+	else:
+		#returns an error message to the html page
+		error = 'Invalid login or username'
+		return render_template('login.html', error=error, placeholder="email", header="Airline Staff Login")
+
+
 #Define route for customer register
 @app.route('/cus_register', methods=['GET', 'POST'])
 def cus_register():
@@ -455,9 +478,9 @@ if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug = True)
  
  
-'''Airline Staff use cases:'''
+#Airline Staff use cases:#
 
-'''4. View flights: Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see all the customers of a particular flight.'''
+#4. View flights: Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see all the customers of a particular flight.'''
 
 @app.route('/view_flights', methods=['GET', 'POST'])
 def view_flights():
@@ -485,7 +508,7 @@ def view_flights():
     return render_template('flight_list_airline_specific.html', data=data)
     
 
-'''5. Create new flights: He or she creates a new flight, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days.'''
+#5. Create new flights: He or she creates a new flight, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days.'''
 
 @app.route('/create_flight', methods=['GET', 'POST'])
 def create_flight():
@@ -512,7 +535,7 @@ def create_flight():
 	return redirect("/cus_home")
 
 
-'''6. Change Status of flights: He or she changes a flight status (from on-time to delayed or vice versa) via forms.'''
+#6. Change Status of flights: He or she changes a flight status (from on-time to delayed or vice versa) via forms.'''
 @app.route('/change_status', methods=['GET', 'POST'])
 def change_status():
 	status = request.form['status']
@@ -521,7 +544,7 @@ def change_status():
 	ins1 = '''INSERT INTO flight SPECIFICALLY status (status,departure_date, departure_date, arrival_date, arrival_time, %s, %s, %s, %s)'''
 	
 
-'''7. Add airplane in the system: He or she adds a new airplane, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. In the confirmation page, she/he will be able to see all the airplanes owned by the airline he/she works for.'''
+#7. Add airplane in the system: He or she adds a new airplane, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. In the confirmation page, she/he will be able to see all the airplanes owned by the airline he/she works for.'''
 @app.route('/add_airplane', methods=['GET', 'POST'])
 def add_airplane():
     #double check staff is logged into the right account and creating for their airline only
@@ -535,8 +558,7 @@ def add_airplane():
     cursor.execute(query, (airplane))
 
 
-'''8. Add new airport in the system: He or she adds a new airport, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action.'''
-
+#8. Add new airport in the system: He or she adds a new airport, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action.'''
 @app.route('/add_airport', methods=['GET', 'POST'])
 def add_airport():
     #double check staff is logged into the right account and creating for their airline only
@@ -545,7 +567,7 @@ def add_airport():
     name = request.form['name']
     cursor = conn.cursor()
 
-'''9. View flight ratings: Airline Staff will be able to see each flight’s average ratings and all the comments and ratings of that flight given by the customers.'''
+#9. View flight ratings: Airline Staff will be able to see each flight’s average ratings and all the comments and ratings of that flight given by the customers.'''
 @app.route('/view_ratings', methods=['GET', 'POST'])
 def view_ratings():
     departure_date = request.form['departure_date']
@@ -557,13 +579,71 @@ def view_ratings():
     cursor.execute(query, (flight_number, rating, comment)) #change to update with daniel's
 
 
-'''10. View all the booking agents: Top 5 booking agents based on number of tickets sales for the past month and past year. Top 5 booking agents based on the amount of commission received for the last year.'''
+#10. View all the booking agents: Top 5 booking agents based on number of tickets sales for the past month and past year. Top 5 booking agents based on the amount of commission received for the last year.'''
+@app.route('/view_booking_agents', methods=['GET', 'POST'])
+def view_booking_agents():
+    cursor = conn.cursor()
+    #we need to add commission, but how do we add this with timelines?
+    queryMonth = '''CREATE VIEW as SELECT TOP (5) WITH TIES FROM booking_agent_id WHERE (airline = %s) ORDER BY commission
+    BETWEEN DATE_ADD(GETDATE(), INTERVAL -30 DAY)'''
+    queryYear = '''SELECT TOP (5) WITH TIES FROM booking_agent_id WHERE (airline = %s) ORDER BY commission
+    BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
+    cursor.execute(queryMonth, (booking_agent_id))
+    cursor.execute(queryYear, (booking_agent_id))
 
+#11. View frequent customers: Airline Staff will also be able to see the most frequent customer within the last year. In addition, Airline Staff will be able to see a list of all flights a particular Customer has taken only on that particular airline.'''
+#what should we define as a frequent customer? right now i have it as top 10 customers
+@app.route('/view_frequent_customers', methods=['GET', 'POST'])
+def view_frequent_customers():
+    cursor = conn.cursor()
+    #must create all customers for x airline
+    queryCreateAllCustomers = '''CREATE VIEW as all_customers SELECT customer_email FROM tickets WHERE (airline = %s)'''
+    query = '''CREATE VIEW as frequent_cus SELECT TOP (10) WITH TIES FROM all_customers BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
+    cursor.execute(queryCreateAllCustomers, (airline))
+	cursor.execute(queryCreateAllCustomers, (customer))
 
-
-'''11. View frequent customers: Airline Staff will also be able to see the most frequent customer within the last year. In addition, Airline Staff will be able to see a list of all flights a particular Customer has taken only on that particular airline.'''
-'''12. View reports: Total amounts of ticket sold based on range of dates/last year/last month etc. Month wise tickets sold in a bar chart.'''
+#12. View reports: Total amounts of ticket sold based on range of dates/last year/last month etc. Month wise tickets sold in a bar chart.
+@app.route('/tickets_sold', methods=['GET', 'POST'])
+def tickets_sold():
+    cursor = conn.cursor()
+    query = '''SQL COUNT(tickets) WHERE (airline = %s)'''#how to get the range?
+	#Month wise tickets sold in a bar chart.
+    cursor.execute(query, (tickets))
  
-'''13. Comparison of Revenue earned: Draw a pie chart for showing total amount of revenue earned from direct sales (when customer bought tickets without using a booking agent) and total amount of revenue earned from indirect sales (when customer bought tickets using booking agents) in the last month and last year.'''
+#13. Comparison of Revenue earned: Draw a pie chart for showing total amount of revenue earned from direct sales 
+#(when customer bought tickets without using a booking agent) and total amount of revenue earned from indirect sales 
+#(when customer bought tickets using booking agents) in the last month and last year.
+@app.route('/compare_revenue', methods=['GET', 'POST'])
+def compare_revenue():
+    cursor = conn.cursor()
+	#draw pie chart -- excel or html?
+    queryMonthCus = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == NULL
+	BETWEEN DATE_ADD(GETDATE(), INTERVAL -30 DAY)'''
+	queryYearCus = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == NULL
+	BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
 
-'''14. View Top destinations: Find the top 3 most popular destinations for last 3 months and last year (based on tickets already sold).'''
+	queryMonthAgent = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == IS NOT NULL
+	BETWEEN DATE_ADD(GETDATE(), INTERVAL -30 DAY)'''
+	queryYearAgent = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == IS NOT NULL
+	BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
+    cursor.execute(queryMonthCus, (tickets))
+	cursor.execute(queryYearCus, (tickets))
+	cursor.execute(queryMonthAgent, (tickets))
+	cursor.execute(queryYearAgent, (tickets))
+
+#14. View Top destinations: Find the top 3 most popular destinations for last 3 months and last year (based on tickets already sold).
+@app.route('/top_popular_destinations', methods=['GET', 'POST']) #remove post 
+def top_popular_destinations():
+    cursor = conn.cursor()
+    queryMonth = '''SELECT TOP (3) city FROM arrival_s FROM ticket NATURAL JOIN flight WHERE (airline = %s) AND flight_number 
+
+	
+	
+	
+	 ORDER BY commission
+    BETWEEN DATE_ADD(GETDATE(), INTERVAL -3 MONTHS)'''
+    queryYear = '''SELECT TOP (5) WITH TIES FROM booking_agent_id WHERE (airline = %s) ORDER BY commission
+    BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
+    cursor.execute(queryMonth, (booking_agent_id))
+    cursor.execute(queryYear, (booking_agent_id))
+
