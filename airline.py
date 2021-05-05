@@ -4,14 +4,14 @@ from datetime import date
 import json
 import pymysql.cursors
 
-
 #Initialize the app from Flask
 app = Flask(__name__)
 
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
+                       port=8889,
 					   user='root',
-					   password='',
+					   password='root',
 					   db='reservation',
 					   charset='utf8mb4',
 					   cursorclass=pymysql.cursors.DictCursor)
