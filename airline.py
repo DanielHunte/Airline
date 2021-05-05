@@ -453,3 +453,117 @@ if __name__ == "__main__":
 	cursor.close()
 
 	app.run('127.0.0.1', 5000, debug = True)
+ 
+ 
+   '''Airline Staff use cases:'''
+
+'''4. View flights: Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see all the customers of a particular flight.'''
+
+@app.route('/view_flights', methods=['GET', 'POST'])
+def view_flights():
+    
+    departure_date = request.form['departure_date']
+    airline = request.form['airline']
+    cursor = conn.cursor()
+    #default view:
+    query = '''SELECT * FROM flight_expanded WHERE (airline = %s)
+    AND departure_date = %s
+    BETWEEN DATE_ADD(GETDATE(), INTERVAL +30 DAY)
+    ORDER BY departure_date DESC,departure_time ASC'''
+    cursor.execute(query, (leaving, leaving, to, to, departure_date)) #change to update with daniel's
+    #custom view:
+    query = '''SELECT * FROM flight_expanded
+    WHERE (departure_airport = %s OR departure_city = %s) AND (arrival_airport = %s
+    OR arrival_city = %s) AND departure_date = %s AND airline = %s
+    ORDER BY departure_date DESC,departure_time ASC'''
+    
+    #view all customers in that flight:
+
+    
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('flight_list_airline_specific.html', data=data)
+    
+
+'''5. Create new flights: He or she creates a new flight, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days.'''
+
+@app.route('/create_flight', methods=['GET', 'POST'])
+ def create_flight():
+ #double check staff is logged into the right account and creating for their airline only
+     flight_number = request.form['flight_number']
+     airline = request.form['airline']
+     departure_airport = request.form['departure_airport']
+     departure_date = request.form['departure_date']
+     departure_time = request.form['departure_time']
+     arrival_airport = request.form['arrival_airport']
+     arrival_date = request.form['arrival_date']
+     arrival_time = request.form['arrival_time']
+     base_price = request.form['base_price']
+     status = request.form['status']
+     airplane_id = request.form['airplane_id']
+
+     cursor = conn.cursor()
+     
+     ins1 = '''INSERT INTO flight(flight_number,airline,departure_airport,departure_date,departure_time,arrival_airport,arrival_date,arrival_time,base_price,status,airplane_id)
+                VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
+
+     conn.commit()
+     cursor.close()
+     return redirect("/cus_home")
+
+
+'''6. Change Status of flights: He or she changes a flight status (from on-time to delayed or vice versa) via forms.'''
+@app.route('/change_status', methods=['GET', 'POST'])
+ def change_status():
+      status = request.form['status']
+      airline = request.form['airline'].title()
+      #must figure out how to grab form user
+      ins1 = '''INSERT INTO flight SPECIFICALLY status (status,departure_date, departure_date, arrival_date, arrival_time, %s, %s, %s, %s)'''
+      
+
+'''7. Add airplane in the system: He or she adds a new airplane, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. In the confirmation page, she/he will be able to see all the airplanes owned by the airline he/she works for.'''
+@app.route('/add_airplane', methods=['GET', 'POST'])
+ def add_airplane():
+    #double check staff is logged into the right account and creating for their airline only
+    airplane = request.form['airplane']
+    id = request.form['id]
+    airline = request.form['airline']
+    number_of_seats = request.form['number_of_seats']
+    cursor = conn.cursor()
+    #create confirmation page which displays
+    query = '''SELECT * FROM airplane WHERE (airline = %s)'''
+    cursor.execute(query, (airplane))
+
+
+'''8. Add new airport in the system: He or she adds a new airport, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action.'''
+
+@app.route('/add_airport', methods=['GET', 'POST'])
+ def add_airport():
+    #double check staff is logged into the right account and creating for their airline only
+    airport = request.form['airport']
+    city = request.form['city]
+    name = request.form['name']
+    cursor = conn.cursor()
+
+'''9. View flight ratings: Airline Staff will be able to see each flight’s average ratings and all the comments and ratings of that flight given by the customers.'''
+@app.route('/view_ratings', methods=['GET', 'POST'])
+def view_ratings():
+    departure_date = request.form['departure_date']
+    airline = request.form['airline']
+    cursor = conn.cursor()
+    #default view:
+    query = '''SELECT flight_number AND rating AND comment FROM rating WHERE (airline = %s)'''
+    #might give an issue since same name
+    cursor.execute(query, (flight_number, rating, comment)) #change to update with daniel's
+
+
+'''10. View all the booking agents: Top 5 booking agents based on number of tickets sales for the past month and past year. Top 5 booking agents based on the amount of commission received for the last year.'''
+
+
+
+'''11. View frequent customers: Airline Staff will also be able to see the most frequent customer within the last year. In addition, Airline Staff will be able to see a list of all flights a particular Customer has taken only on that particular airline.'''
+'''12. View reports: Total amounts of ticket sold based on range of dates/last year/last month etc. Month wise tickets sold in a bar chart.'''
+ 
+'''13. Comparison of Revenue earned: Draw a pie chart for showing total amount of revenue earned from direct sales (when customer bought tickets without using a booking agent) and total amount of revenue earned from indirect sales (when customer bought tickets using booking agents) in the last month and last year.'''
+
+'''14. View Top destinations: Find the top 3 most popular destinations for last 3 months and last year (based on tickets already sold).'''
