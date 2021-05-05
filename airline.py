@@ -455,7 +455,7 @@ if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug = True)
  
  
-   '''Airline Staff use cases:'''
+'''Airline Staff use cases:'''
 
 '''4. View flights: Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see all the customers of a particular flight.'''
 
@@ -488,45 +488,45 @@ def view_flights():
 '''5. Create new flights: He or she creates a new flight, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days.'''
 
 @app.route('/create_flight', methods=['GET', 'POST'])
- def create_flight():
- #double check staff is logged into the right account and creating for their airline only
-     flight_number = request.form['flight_number']
-     airline = request.form['airline']
-     departure_airport = request.form['departure_airport']
-     departure_date = request.form['departure_date']
-     departure_time = request.form['departure_time']
-     arrival_airport = request.form['arrival_airport']
-     arrival_date = request.form['arrival_date']
-     arrival_time = request.form['arrival_time']
-     base_price = request.form['base_price']
-     status = request.form['status']
-     airplane_id = request.form['airplane_id']
+def create_flight():
+#double check staff is logged into the right account and creating for their airline only
+	flight_number = request.form['flight_number']
+	airline = request.form['airline']
+	departure_airport = request.form['departure_airport']
+	departure_date = request.form['departure_date']
+	departure_time = request.form['departure_time']
+	arrival_airport = request.form['arrival_airport']
+	arrival_date = request.form['arrival_date']
+	arrival_time = request.form['arrival_time']
+	base_price = request.form['base_price']
+	status = request.form['status']
+	airplane_id = request.form['airplane_id']
 
-     cursor = conn.cursor()
-     
-     ins1 = '''INSERT INTO flight(flight_number,airline,departure_airport,departure_date,departure_time,arrival_airport,arrival_date,arrival_time,base_price,status,airplane_id)
-                VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
+	cursor = conn.cursor()
+	
+	ins1 = '''INSERT INTO flight(flight_number,airline,departure_airport,departure_date,departure_time,arrival_airport,arrival_date,arrival_time,base_price,status,airplane_id)
+			VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
 
-     conn.commit()
-     cursor.close()
-     return redirect("/cus_home")
+	conn.commit()
+	cursor.close()
+	return redirect("/cus_home")
 
 
 '''6. Change Status of flights: He or she changes a flight status (from on-time to delayed or vice versa) via forms.'''
 @app.route('/change_status', methods=['GET', 'POST'])
- def change_status():
-      status = request.form['status']
-      airline = request.form['airline'].title()
-      #must figure out how to grab form user
-      ins1 = '''INSERT INTO flight SPECIFICALLY status (status,departure_date, departure_date, arrival_date, arrival_time, %s, %s, %s, %s)'''
-      
+def change_status():
+	status = request.form['status']
+	airline = request.form['airline'].title()
+	#must figure out how to grab form user
+	ins1 = '''INSERT INTO flight SPECIFICALLY status (status,departure_date, departure_date, arrival_date, arrival_time, %s, %s, %s, %s)'''
+	
 
 '''7. Add airplane in the system: He or she adds a new airplane, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. In the confirmation page, she/he will be able to see all the airplanes owned by the airline he/she works for.'''
 @app.route('/add_airplane', methods=['GET', 'POST'])
- def add_airplane():
+def add_airplane():
     #double check staff is logged into the right account and creating for their airline only
     airplane = request.form['airplane']
-    id = request.form['id]
+    id = request.form['id']
     airline = request.form['airline']
     number_of_seats = request.form['number_of_seats']
     cursor = conn.cursor()
@@ -538,10 +538,10 @@ def view_flights():
 '''8. Add new airport in the system: He or she adds a new airport, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action.'''
 
 @app.route('/add_airport', methods=['GET', 'POST'])
- def add_airport():
+def add_airport():
     #double check staff is logged into the right account and creating for their airline only
     airport = request.form['airport']
-    city = request.form['city]
+    city = request.form['city']
     name = request.form['name']
     cursor = conn.cursor()
 
