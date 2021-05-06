@@ -482,7 +482,7 @@ if __name__ == "__main__":
 
 #4. View flights: Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see all the customers of a particular flight.'''
 
-@app.route('/view_flights', methods=['GET', 'POST'])
+@app.route('/view_flights', methods=['GET')
 def view_flights():
     
     departure_date = request.form['departure_date']
@@ -524,9 +524,7 @@ def create_flight():
 	base_price = request.form['base_price']
 	status = request.form['status']
 	airplane_id = request.form['airplane_id']
-
 	cursor = conn.cursor()
-	
 	ins1 = '''INSERT INTO flight(flight_number,airline,departure_airport,departure_date,departure_time,arrival_airport,arrival_date,arrival_time,base_price,status,airplane_id)
 			VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
 
@@ -539,48 +537,55 @@ def create_flight():
 @app.route('/change_status', methods=['GET', 'POST'])
 def change_status():
 	status = request.form['status']
-	airline = request.form['airline'].title()
-	#must figure out how to grab form user
-	ins1 = '''INSERT INTO flight SPECIFICALLY status (status,departure_date, departure_date, arrival_date, arrival_time, %s, %s, %s, %s)'''
+	departure_date = request.form['departure_date']
+	arrival_date = request.form['arrival_date']
+	arrival_time = request.form['arrival_time']
+	airline = request.form['airline'].title() 	#must figure out how to grab form userx
+	ins1 = '''INSERT INTO flight SPECIFICALLY status (status,departure_date, departure_time, arrival_date, arrival_time, %s, %s, %s, %s, %s)'''
+	conn.commit()
+	cursor.close()
+	return redirect("/cus_home")
 	
 
 #7. Add airplane in the system: He or she adds a new airplane, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. In the confirmation page, she/he will be able to see all the airplanes owned by the airline he/she works for.'''
 @app.route('/add_airplane', methods=['GET', 'POST'])
 def add_airplane():
     #double check staff is logged into the right account and creating for their airline only
-    airplane = request.form['airplane']
     id = request.form['id']
     airline = request.form['airline']
     number_of_seats = request.form['number_of_seats']
     cursor = conn.cursor()
     #create confirmation page which displays
-    query = '''SELECT * FROM airplane WHERE (airline = %s)'''
-    cursor.execute(query, (airplane))
-
+	ins1 = '''INSERT INTO airplane (id,airline, number_of_seats, %s, %s, %s)'''
+	conn.commit()
+	cursor.close()
+	return redirect("/cus_home")
 
 #8. Add new airport in the system: He or she adds a new airport, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action.'''
 @app.route('/add_airport', methods=['GET', 'POST'])
 def add_airport():
     #double check staff is logged into the right account and creating for their airline only
-    airport = request.form['airport']
     city = request.form['city']
     name = request.form['name']
-    cursor = conn.cursor()
+	ins1 = '''INSERT INTO airport (city, name, %s, %s)'''
+	conn.commit()
+	cursor.close()
+	return redirect("/cus_home")
 
-#9. View flight ratings: Airline Staff will be able to see each flight’s average ratings and all the comments and ratings of that flight given by the customers.'''
-@app.route('/view_ratings', methods=['GET', 'POST'])
+#9. View flight ratings: Airline Staff will be able to see each flight’s average ratings and all the comments and ratings of that flight given by the customers.
+@app.route('/view_ratings', methods=['GET'])
 def view_ratings():
     departure_date = request.form['departure_date']
     airline = request.form['airline']
     cursor = conn.cursor()
     #default view:
-    query = '''SELECT flight_number AND rating AND comment FROM rating WHERE (airline = %s)'''
+    query = '''SELECT flight_number AND rating AND comment FROM rating WHERE airline'''
     #might give an issue since same name
     cursor.execute(query, (flight_number, rating, comment)) #change to update with daniel's
 
 
 #10. View all the booking agents: Top 5 booking agents based on number of tickets sales for the past month and past year. Top 5 booking agents based on the amount of commission received for the last year.'''
-@app.route('/view_booking_agents', methods=['GET', 'POST'])
+@app.route('/view_booking_agents', methods=['GET'])
 def view_booking_agents():
     cursor = conn.cursor()
     #we need to add commission, but how do we add this with timelines?
@@ -636,14 +641,9 @@ def compare_revenue():
 def top_popular_destinations():
     cursor = conn.cursor()
     queryMonth = '''SELECT TOP (3) city FROM arrival_s FROM ticket NATURAL JOIN flight WHERE (airline = %s) AND flight_number 
-
-	
-	
-	
 	 ORDER BY commission
     BETWEEN DATE_ADD(GETDATE(), INTERVAL -3 MONTHS)'''
     queryYear = '''SELECT TOP (5) WITH TIES FROM booking_agent_id WHERE (airline = %s) ORDER BY commission
     BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
     cursor.execute(queryMonth, (booking_agent_id))
     cursor.execute(queryYear, (booking_agent_id))
-
