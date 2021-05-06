@@ -1,7 +1,6 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
 from datetime import date
-import json
 import pymysql.cursors
 
 #Initialize the app from Flask
@@ -9,7 +8,7 @@ app = Flask(__name__)
 
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
-                       port=8889,
+                       port=3306,
 					   user='root',
 					   password='root',
 					   db='reservation',
@@ -106,22 +105,22 @@ def flight_status():
 #Define route for customer login
 @app.route('/cus_login')
 def cus_login():
-	return render_template('login.html', auth_url="/cus_login_auth", placeholder="email", header="Customer Login")
+	return render_template('cus_login.html')
 
 #Define route for agent login
 @app.route('/agent_login')
 def agent_login():
-	return render_template('login.html', auth_url="/agent_login_auth", placeholder="email", header="Booking Agent Login")
+	return render_template('agent_login.html')
 
-#Define route for staff login
-@app.route('/staff_login')
+#Define route for airline staff login
+@app.route('/astaff_login')
 def staff_login():
-	return render_template('login.html', auth_url="/staff_login_auth", placeholder="username", header="Airline Staff Login")
+	return render_template('astaff_login.html')
 
 #Authenticates the customer login
 @app.route('/cus_login_auth', methods=['GET', 'POST'])
 def cus_login_auth():
-	email = request.form['username']
+	email = request.form['email']
 	password = request.form['password']
 	cursor = conn.cursor()
 	query = 'SELECT * FROM customer WHERE email = %s and password = MD5(%s)'
@@ -137,7 +136,28 @@ def cus_login_auth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or email'
-		return render_template('login.html', error=error, placeholder="email", header="Customer Login")
+		return render_template('cus_login.html', error=error)
+
+#Authenticates the customer login
+@app.route('/agent_login_auth', methods=['GET', 'POST'])
+def agent_login_auth():
+	email = request.form['username']
+	password = request.form['password']
+	cursor = conn.cursor()
+	query = 'SELECT * FROM booking_agent WHERE email = %s and password = MD5(%s)'
+	cursor.execute(query, (email, password))
+	data = cursor.fetchone()
+	cursor.close()
+	error = None
+	if(data):
+		#creates a session for the the user
+		#session is a built in
+		session['username'] = email
+		return redirect(url_for('agent_home'))
+	else:
+		#returns an error message to the html page
+		error = 'Invalid login or email'
+		return render_template('login.html', error=error, placeholder="email", header="Booking Agent Login")
 
 #Authenticates the airline staff login
 @app.route('/astaff_login_auth', methods=['GET', 'POST'])
@@ -161,7 +181,6 @@ def astaff_login_auth():
 		error = 'Invalid login or username'
 		return render_template('login.html', error=error, placeholder="email", header="Airline Staff Login")
 
-
 #Define route for customer register
 @app.route('/cus_register', methods=['GET', 'POST'])
 def cus_register():
@@ -177,9 +196,9 @@ def agent_register():
 def staff_register():
 	return render_template('staff_register.html')
 
-#Authenticates the register
+#Authenticates the register for customer
 @app.route('/cus_register_auth', methods=['GET', 'POST'])
-def registerAuth():
+def cus_register_auth():
 	email = request.form['email']
 
 	cursor = conn.cursor()
@@ -211,18 +230,64 @@ def registerAuth():
 		cursor.close()
 		return redirect('/cus_login')
 
+#Authenticates the register for customer
+@app.route('/agent_register_auth', methods=['GET', 'POST'])
+def agent_register_auth():
+	email = request.form['email']
+
+	cursor = conn.cursor()
+	query = 'SELECT * FROM booking_agent WHERE email = %s'
+	cursor.execute(query, (email))
+	data = cursor.fetchone()
+	error = None
+	if(data):
+		#If the previous query returns data, then user exists
+		error = "This user already exists"
+		return render_template('agent_register.html', error = error)
+	else:
+		booking_agent_ID = request.form['booking_agent_ID']
+		password = request.form['password']
+		
+		ins = '''INSERT INTO booking_agent (email,password,booking_agent_ID)
+				 VALUES(%s,MD5(%s),%s)'''
+		cursor.execute(ins, (email,password,booking_agent_ID))
+		conn.commit()
+		cursor.close()
+		return redirect('/agent_login')
+
 @app.route('/cus_home')
 def cus_home():
 	email = session['username']
 	cursor = conn.cursor()
-	query = '''SELECT * FROM customer JOIN ticket NATURAL JOIN flight_expanded WHERE ticket.customer_email = customer.email AND customer_email = %s AND departure_date >= CURDATE()
+
+	query = '''SELECT *
+			   FROM customer LEFT JOIN ticket ON (ticket.customer_email = customer.email) NATURAL LEFT JOIN flight_expanded
+			   WHERE customer.email = %s AND departure_date >= CURDATE()
 			   ORDER BY departure_date ASC,departure_time ASC'''
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
+	if len(data) == 0:
+		query = '''SELECT *
+			   	   FROM customer LEFT JOIN ticket ON (ticket.customer_email = customer.email) NATURAL LEFT JOIN flight_expanded
+			   	   WHERE customer.email = %s'''
+		cursor.execute(query, (email))
+		data = cursor.fetchall()
 	name = data[0]['name']
 	cursor.close()
 	return render_template('cus_home.html', name=name, data=data)
 
+@app.route('/agent_home')
+def agent_home():
+	email = session['username']
+	cursor = conn.cursor()
+	query = '''SELECT * 
+			   FROM booking_agent JOIN agent_purchase ON (booking_agent.email = agent_purhase.agent_email) JOIN ticket ON (ticket.ID = agent_purchase.ticket_ID) NATURAL JOIN flight_expanded WHERE agent_email = %s AND departure_date >= CURDATE()
+			   ORDER BY departure_date DESC,departure_time DESC'''
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	booking_agent_ID = data[0]['booking_agent_ID']
+	cursor.close()
+	return render_template('agent_home.html', booking_agent_ID=booking_agent_ID, data=data)
 
 @app.route('/purchase_oneway_list', methods=['GET', 'POST'])
 def purchase_oneway_list():
@@ -443,7 +508,7 @@ def track_spending():
 	data = cursor.fetchall()
 	result = []
 	for line in data:
-		result.append([str(line['year']) + "/" + str(line['month']), line['total']])
+		result.append([str(line['month']) + "/" + str(line['year']), line['total']])
 	cursor.close()
 	return render_template('track_spending.html', result=result, total=total['total'], start_date=start_date, end_date=end_date)
 
@@ -459,18 +524,12 @@ app.secret_key = 'some key that you will never guess'
 if __name__ == "__main__":
 	cursor = conn.cursor()
 	query = '''CREATE VIEW IF NOT EXISTS flight_expanded AS
-					WITH flight_city AS
-						(SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price
-						FROM flight JOIN (SELECT name AS departure_airport_name, city AS departure_city FROM airport) as s JOIN (SELECT name AS arrival_airport_name, city AS arrival_city FROM airport) as t
-						WHERE departure_airport = s.departure_airport_name AND arrival_airport = t.arrival_airport_name)
-						,
-						flight_size AS
-						(SELECT flight_number as flight_num,airline AS airl,IFNULL(COUNT(ticket.ID),0) as number_of_passengers
-						FROM flight NATURAL LEFT JOIN ticket 
-						GROUP BY flight_number,airline)
-
 					SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price,IF(number_of_passengers < 0.7*number_of_seats, base_price, 1.2*base_price) AS sale_price,number_of_seats,number_of_passengers
-						FROM (SELECT * FROM flight_city AS s JOIN (SELECT ID,airline AS al,number_of_seats FROM airplane) AS t ON (s.airplane_ID = t.ID AND s.airline = t.al)) AS u JOIN flight_size
+						FROM (SELECT * FROM (SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price
+						FROM flight JOIN (SELECT name AS departure_airport_name, city AS departure_city FROM airport) as s JOIN (SELECT name AS arrival_airport_name, city AS arrival_city FROM airport) as t
+						WHERE departure_airport = s.departure_airport_name AND arrival_airport = t.arrival_airport_name) AS s JOIN (SELECT ID,airline AS al,number_of_seats FROM airplane) AS t ON (s.airplane_ID = t.ID AND s.airline = t.al)) AS u JOIN (SELECT flight_number as flight_num,airline AS airl,IFNULL(COUNT(ticket.ID),0) as number_of_passengers
+						FROM flight NATURAL LEFT JOIN ticket 
+						GROUP BY flight_number,airline) AS flight_size
 						ON (flight_size.flight_num = u.flight_number AND flight_size.airl = u.airline)'''
 	cursor.execute(query)
 	cursor.close()

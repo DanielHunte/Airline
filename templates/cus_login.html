@@ -2,9 +2,9 @@
 <head>
 </head>
 <body>
-	<h1>{{header}}</h1>
-<form action="{{auth_url}}" method="POST">
-	<input type="text" name = "username" placeholder="{{placeholder}}" required/> </br>
+	<h1>Customer Login</h1>
+<form action="/cus_login_auth" method="POST">
+	<input type="text" name = "email" placeholder="email" required/> </br>
 	<input type="password" name = "password" placeholder="password" required/><br></br>
 	<input type="submit" value = Login />
 	{% if error %}

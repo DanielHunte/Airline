@@ -14,7 +14,7 @@ VALUES ('djh459@nyu.edu','Daniel Hunte',MD5('hellothere'),'204','Cleveland Stree
        ('lm3945@nyu.edu','Luiza Menezes',MD5('hardpassword'),'354','Crescent Street','New York','NY','19176473387','TA764986','2025/06/02','United State of America','2000/04/17');
 
 INSERT INTO booking_agent
-VALUES ('elon@gmail.com','themartian','Emusk123');
+VALUES ('elon@gmail.com',MD5('themartian'),'Emusk123');
 
 INSERT INTO airplane
 VALUES ('8374','China Eastern',100),
