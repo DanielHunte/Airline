@@ -22,8 +22,8 @@ VALUES ('8374','China Eastern',100),
        ('38','Caribbean Airlines',60);
 
 INSERT INTO airline_staff
-VALUES ('GeorgeB','China Eastern','myjobsucks','George','Benson','1985/07/12'),
-       ('DonaldT','Caribbean Airlines','itsgonnabehuge','Donald','Trump','1948/04/30');
+VALUES ('GeorgeB','China Eastern',MD5('myjobsucks'),'George','Benson','1985/07/12'),
+       ('DonaldT','Caribbean Airlines',MD5('itsgonnabehuge'),'Donald','Trump','1948/04/30');
 
 INSERT INTO staff_phone_number
 VALUES ('GeorgeB','China Eastern','16138764937'),
