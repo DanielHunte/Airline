@@ -2,7 +2,7 @@
 <head>
 </head>
 <body>
-	<h1>Departing Flights</h1>
+	<h1>Flights</h1>
 
 <style type="text/css">
 	table, th, td{
@@ -17,6 +17,7 @@
 	<th>Departure Date</th>
 	<th>Arrival Date</th>
 	<th>Price</th>
+	<th></th>
 
 {% for line in data %}
 	<tr>
@@ -26,18 +27,19 @@
 		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
 		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
 		<td>${{'%0.2f' % line['sale_price']|float}}</td>
+		<td>
+			<form action="/agent_purchase_oneway_form" method="POST">
+				<button type="submit" class="btn-link" >Select</button>
+				<input type="hidden" name="flight_number" value="{{line['flight_number']}}">
+				<input type="hidden" name="airline" value="{{line['airline']}}">
+			</form>
+		</td>
 	</tr>
 {% endfor %}
 </table><br>
-<form action="/returning_trip" method="post">
-    <button type="submit" class="btn-link">View Returning Flights</button>
-	<input type="hidden" name="leaving" value={{to}}>
-	<input type="hidden" name="to" value={{leaving}}>
-	<input type="hidden" name="departure_date" value={{departure_date}}>
-	<input type="hidden" name="returning_date" value={{returning_date}}>
-</form><br>
+
 <form>
-	<input type="submit" value = "Go home" formaction="/"/>
+	<input type="submit" value = "Go back" formaction="/agent_home"/>
 </form>
 
 </body>

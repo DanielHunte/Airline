@@ -1,0 +1,29 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Purchasing Ticket</h1>
+<form action="/agent_purchase_oneway_ticket" method="POST">
+	<input type="text" name = "cus_email" placeholder="Customer Email"/></br>
+	<input type="text" name = "card_type" placeholder="Card Type"/></br>
+	<input type="text" name = "card_number" placeholder="Card Number"/></br>
+	<input type="text" name = "name_on_card" placeholder="Name on Card"/></br>
+	<input type="text" name = "expiration_date" placeholder="Expiration Date" onfocus="(this.type='date')"/></br>
+    <input type="hidden" name="flight_number" value="{{data['flight_number']}}">
+    <input type="hidden" name="airline" value="{{data['airline']}}">
+    <input type="hidden" name="leaving" value="{{data['departure_airport']}}">
+    <input type="hidden" name="to" value="{{data['arrival_airport']}}"><br>
+    <input type="hidden" name="departure_date" value="{{data['departure_date']}}"><br>
+	<input type="hidden" name="total" value="{{data['sale_price']}}"><br>
+	<h2>Total: ${{'%0.2f' % data['sale_price']|float}}</h2>
+	<input type="submit" value = "Complete Booking" /><br><br>
+    <input type="submit" value = "Go back" formaction="/agent_oneway_purchase"/>
+	<input type="hidden" name = "departing_from" value="{{data['departure_airport']}}"/>
+	<input type="hidden" name = "departing_to" value="{{data['arrival_airport']}}"/>
+	<input type="hidden" name = "departure_date" value="{{data['departure_date']}}"/>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form><br>
+</body>
+</html>

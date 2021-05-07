@@ -34,9 +34,11 @@
     <button type="submit" class="btn-link">Go back</button>
 	<input type="hidden" name="leaving" value={{leaving}}>
 	<input type="hidden" name="to" value={{to}}>
-	<input type="hidden" name="departure_date" value={{returning_date}}>
-	<input type="hidden" name="returning_date" value={{departure_date}}>
-	<input type="submit" value = "Go home" formaction="/"/>
+	<input type="hidden" name="departure_date" value={{departure_date}}>
+	<input type="hidden" name="returning_date" value={{returning_date}}>
+</form><br>
+<form action="/" method="post">
+    <button type="submit" class="btn-link">Go Home</button>
 </form>
 
 </body>

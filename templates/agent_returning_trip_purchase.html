@@ -1,0 +1,61 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Returning Flights</h1>
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+	<th>Flight No</th>
+	<th>Leaving from</th>
+	<th>Going to</th>
+	<th>Departure Date</th>
+	<th>Arrival Date</th>
+	<th>Price</th>
+	<th></th>
+
+{% for line in data %}
+	<tr>
+		<td>{{line['flight_number']}}</td>
+		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
+		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
+		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
+		<td>${{'%0.2f' % line['sale_price']|float}}</td>
+		<td>
+			<form action="/agent_purchase_roundtrip_form" method="POST">
+				<button type="submit" class="btn-link" >Select</button>
+				<input type="hidden" name="departure_flight_number" value="{{departure_flight_number}}">
+				<input type="hidden" name="departure_airline" value="{{departure_airline}}">
+				<input type="hidden" name="departure_date" value="{{departure_date}}">
+				<input type="hidden" name="departure_price" value="{{departure_price}}">
+				<input type="hidden" name="returning_flight_number" value="{{line['flight_number']}}">
+				<input type="hidden" name="returning_airline" value="{{line['airline']}}">
+				<input type="hidden" name="returning_price" value="{{line['sale_price']}}">
+
+				<input type="hidden" name="returning_from" value="{{line['departure_airport']}}">
+				<input type="hidden" name="returning_to" value="{{line['arrival_airport']}}">
+				<input type="hidden" name="returning_date" value="{{line['departure_date']}}">
+			</form>
+		</td>
+	</tr>
+{% endfor %}
+</table><br>
+
+<form action="/agent_departing_trip_purchase" method="POST">
+	<button type="submit" class="btn-link" >Go back</button>
+	<input type="hidden" name="departing_from" value="{{data[0]['arrival_airport']}}">
+	<input type="hidden" name="departing_to" value="{{data[0]['departure_airport']}}">
+	<input type="hidden" name="departure_date" value="{{departure_date}}">
+	<input type="hidden" name="returning_date" value="{{data[0]['departure_date']}}">
+</form>
+
+</body>
+
+
+</html>

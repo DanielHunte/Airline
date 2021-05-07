@@ -78,13 +78,13 @@
 <body>
 	<h1>Welcome {{booking_agent_ID}}</h1>
 <h3>Flight Search</h3>
-	<form action="/purchase_oneway_list" method="POST">
+	<form action="/agent_oneway_purchase" method="POST">
 		<input type="text" name = "departing_from" placeholder="Leaving from" required/>
 		<input type="text" name = "departing_to" placeholder="Going to" required/>
 		<input type="text" name = "departure_date" placeholder="Departing date" onfocus="(this.type='date')"/>
 		<input type="text" name = "returning_date" placeholder="Returning date" onfocus="(this.type='date')"/></br></br>
 		<input type="submit" value = "One Way"/>
-		<input type="submit" value = "Round Trip" formaction="/departing_trip_purchase"/>
+		<input type="submit" value = "Round Trip" formaction="/agent_departing_trip_purchase"/>
 	</form><br><br><br><br>
 
 	<form action="/agent_flights" method="POST">
