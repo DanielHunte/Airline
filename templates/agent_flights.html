@@ -1,0 +1,45 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>My Flights</h1>
+	<h3>From {{start_date}} to {{end_date}}</h3>
+	<form action="/agent_flights" method="POST">
+		<input type="text" name = "start_date" placeholder="Start Date" onfocus="(this.type='date')" required/>
+		<input type="text" name = "end_date" placeholder="End Date" onfocus="(this.type='date')" required/>
+		<input type="submit" value = "Search"/>
+	</form>
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+    <th>Customer</th>
+	<th>Flight No</th>
+	<th>Departure City</th>
+	<th>Arrival City</th>
+	<th>Departure Date</th>
+	<th>Arrival Date</th>
+
+{% for line in data %}
+	<tr>
+        <td>{{line['name']}} <br> {{line['customer_email']}}</td>
+		<td>{{line['flight_number']}}</td>
+		<td>{{line['departure_city']}}</td>
+		<td>{{line['arrival_city']}}</td>
+		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
+	</tr>
+{% endfor %}
+</table><br>
+
+<form>
+	<input type="submit" value = "Go back" formaction="/agent_home"/>
+</form>
+</body>
+
+
+</html>

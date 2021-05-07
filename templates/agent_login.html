@@ -1,0 +1,23 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Booking Agent Login</h1>
+<form action="/agent_login_auth" method="POST">
+	<input type="text" name = "email" placeholder="email" required/> </br>
+	<input type="password" name = "password" placeholder="password" required/><br></br>
+	<input type="submit" value = Login />
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form><br>
+<div>Don't have an account?
+	<form style="display: inline;">
+		<input type="submit" value = "Register" formaction="/agent_register"/><br></br>
+		<input type="submit" value = "Go home" formaction="/"/>
+	</form>
+</div>
+</body>
+
+
+</html>

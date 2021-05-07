@@ -1,47 +1,82 @@
 <html>
-<head>
-</head>
+	<head>
+		<link rel="stylesheet" href="style.css">
+			<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+			<script>
+				google.charts.load('current', {packages: ['corechart', 'bar']});
+				google.charts.setOnLoadCallback(drawBasic);
+
+				function drawBasic() {
+
+					var data = new google.visualization.DataTable();
+					data.addColumn('string', 'Customer');
+					data.addColumn('number', 'Number of Tickets');
+				
+					var result = JSON.parse('{{tickets}}'.split("&#39;").join('"'));
+					data.addRows(result);
+					
+					var options = {
+						title: 'Top 5 Customers by Commission',
+						legend: 'none',
+						width: 500,
+						height: 300,
+						bar: {groupWidth: '75%'},
+						hAxis: {
+							title: 'Customer',
+							format: 'text',
+						},
+						vAxis: {
+							title: 'Number of Tickets',
+							format: '#'
+						}
+					};
+
+					var chart = new google.visualization.ColumnChart(
+						document.getElementById('tickets_chart'));
+
+					chart.draw(data, options);
+					}
+			</script>
+			<link rel="stylesheet" href="style.css">
+			<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+			<script>
+				google.charts.load('current', {packages: ['corechart', 'bar']});
+				google.charts.setOnLoadCallback(drawBasic);
+
+				function drawBasic() {
+
+					var data = new google.visualization.DataTable();
+					data.addColumn('string', 'Customer');
+					data.addColumn('number', 'Number of Tickets');
+				
+					var result = JSON.parse('{{commission}}'.split("&#39;").join('"'));
+					data.addRows(result);
+					
+					var options = {
+						title: 'Top 5 Customers by Tickets',
+						legend: 'none',
+						width: 500,
+						height: 300,
+						bar: {groupWidth: '75%'},
+						hAxis: {
+							title: 'Customer',
+							format: 'text',
+						},
+						vAxis: {
+							title: 'Number of Tickets',
+							format: '#'
+						}
+					};
+
+					var chart = new google.visualization.ColumnChart(
+						document.getElementById('commision_chart'));
+
+					chart.draw(data, options);
+					}
+			</script>  
+	</head>
 <body>
 	<h1>Welcome {{booking_agent_ID}}</h1>
-	<h3>My Transactions</h3>
-	<form action="/agent_home" method="POST">
-		<input type="text" name = "start_date" placeholder="Start Date" onfocus="(this.type='date')"/>
-		<input type="text" name = "end_date" placeholder="End date" onfocus="(this.type='date')"/></br></br>
-		<input type="submit" value = "Search"/>
-	</form>
-<form>
-<style type="text/css">
-	table, th, td{
-		border: 1px solid black;
-	}
-</style>
-
-<table>
-	<th>Flight No</th>
-	<th>Departure City</th>
-	<th>Arrival City</th>
-	<th>Departure Date</th>
-	<th>Arrival Date</th>
-
-{% for line in data %}
-	<tr>
-		<td>{{line['flight_number']}}</td>
-		<td>{{line['departure_city']}}</td>
-		<td>{{line['arrival_city']}}</td>
-		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
-		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
-	</tr>
-{% endfor %}
-</table><br>
-
-<form action="/rate_flight_list" method="POST" style='display:inline;'>
-	<input type="submit" value = "Rate Previous Flights"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</form>
-<form action="/track_spending" method="POST" style='display:inline;'>
-	<input type="submit" value = "Track Spending"/>
-	<input type="hidden" id="start_date" name="start_date">
-	<input type="hidden" id="end_date" name="end_date">
-</form><br>
 <h3>Flight Search</h3>
 	<form action="/purchase_oneway_list" method="POST">
 		<input type="text" name = "departing_from" placeholder="Leaving from" required/>
@@ -50,12 +85,27 @@
 		<input type="text" name = "returning_date" placeholder="Returning date" onfocus="(this.type='date')"/></br></br>
 		<input type="submit" value = "One Way"/>
 		<input type="submit" value = "Round Trip" formaction="/departing_trip_purchase"/>
+	</form><br><br><br><br>
+
+	<form action="/agent_flights" method="POST">
+		<input type="hidden" name = "start_date" value='{{start_date}}'/>
+		<input type="hidden" name = "end_date" value='{{end_date}}'/>
+		<input type="submit" value = "View My Flights"/>
 	</form>
+	<form action="/agent_commission" method="POST">
+		<input type="hidden" name = "commission_start_date" value='{{commission_start_date}}'/>
+		<input type="hidden" name = "commission_end_date" value='{{commission_end_date}}'/>
+		<input type="submit" value = "My Commission"/>
+	</form>
+	<table>
+		<tr>
+			<td><div id="tickets_chart" style="width: 600px; height: 300px;"></div></td>
+			<td><div id="commision_chart" style="width: 600px; height: 300px;"></div></td>
+		</tr>
+	 <table>
 <form>
 	<input type="submit" value = "Logout" formaction="/logout"/>
 </form>
 
 </body>
-
-
 </html>

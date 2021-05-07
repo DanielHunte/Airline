@@ -3,13 +3,12 @@
 </head>
 <body>
 	<h1>Airline Staff Registration</h1>
-<form action="/cus_register_auth" method="POST">
-    <input type="text" username = "username" placeholder="username" required/></br>
+<form action="/astaff_register_auth" method="POST">
+    <input type="text" name = "airline" placeholder="Airline" required/></br>
+    <input type="text" name = "username" placeholder="Username" required/></br>
     <input type="password" name = "password" placeholder="Password" required/></br>
-    <input type="text" first_name = "first name" placeholder="First Name" required/></br>
-    <input type="text" last_name = "last name" placeholder="Last Name" required/></br>
-    <input type="text" name = "email" placeholder="Email" required/></br>
-    <input type="text" name = "airline" placeholder="airline" required/></br>
+    <input type="text" name = "first_name" placeholder="First Name" required/></br>
+    <input type="text" name = "last_name" placeholder="Last Name" required/></br>
     <input type="text" name = "date_of_birth" placeholder="Date of Birth" required onfocus="(this.type='date')"/><br></br>
 	<input type="submit" value = Register />
 	{% if error %}

@@ -13,6 +13,7 @@
                 data.addColumn('number', 'Motivation Level');
                 
                 var result = JSON.parse('{{result}}'.split("&#39;").join('"'));
+                document.write('{{result}}')
                 data.addRows(result);
                 
                 var options = {

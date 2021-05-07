@@ -1,0 +1,17 @@
+<html>
+<head>
+</head>
+<body>
+    <h2>From {{commission_start_date}} to {{commission_end_date}}</h2>
+    <form action="/agent_commission" method="POST">
+		<input type="text" name = "commission_start_date" placeholder="Start Date" onfocus="(this.type='date')" required/>
+		<input type="text" name = "commission_end_date" placeholder="End Date" onfocus="(this.type='date')" required/>
+		<input type="submit" value = "Search"/>
+	</form><br>
+    <div>Total commision = ${{'%0.2f' % data['total']|float}}</div><br>
+    <div>Average commision = ${{'%0.2f' % data['average']|float}}</div><br>
+    <div>Number of tickets = {{data['num_tickets']}}</div><br><br>
+    <form>
+        <input type="submit" value = "Go back" formaction="/agent_home"/>
+    </form>
+</body>

@@ -2,8 +2,8 @@
 <head>
 </head>
 <body>
-	<h1>{{Airline Staff Login}}</h1>
-<form action="{{auth_url}}" method="POST">
+	<h1>Airline Staff Login</h1>
+<form action="astaff_login_auth" method="POST">
 	<input type="text" name = "username" placeholder="username" required/> </br>
     <input type="password" name = "password" placeholder="password" required/><br>
     <input type="airline" name = "airline" placeholder="airline" required/><br>
@@ -16,7 +16,7 @@
 </form><br>
 <div>Don't have an account?
 	<form style="display: inline;">
-		<input type="submit" value = "Register" formaction="/cus_register"/><br></br>
+		<input type="submit" value = "Register" formaction="/astaff_register"/><br></br>
 		<input type="submit" value = "Go home" formaction="/"/>
 	</form>
 </div>

@@ -1,6 +1,6 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
-from datetime import date
+from datetime import date, timedelta
 import pymysql.cursors
 
 #Initialize the app from Flask
@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
-                       port=8889,
+                       port=3306,
 					   user='root',
 					   password='root',
 					   db='reservation',
@@ -141,7 +141,7 @@ def cus_login_auth():
 #Authenticates the customer login
 @app.route('/agent_login_auth', methods=['GET', 'POST'])
 def agent_login_auth():
-	email = request.form['username']
+	email = request.form['email']
 	password = request.form['password']
 	cursor = conn.cursor()
 	query = 'SELECT * FROM booking_agent WHERE email = %s and password = MD5(%s)'
@@ -157,7 +157,7 @@ def agent_login_auth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or email'
-		return render_template('login.html', error=error, placeholder="email", header="Booking Agent Login")
+		return render_template('agent_login.html', error=error)
 
 #Authenticates the airline staff login
 @app.route('/astaff_login_auth', methods=['GET', 'POST'])
@@ -166,8 +166,8 @@ def astaff_login_auth():
 	password = request.form['password']
 	airline = request.form['airline']
 	cursor = conn.cursor()
-	query = 'SELECT * FROM airline_staff WHERE username = %s and password = MD5(%s)'
-	cursor.execute(query, (email, password))
+	query = 'SELECT * FROM airline_staff WHERE airline = %s AND username = %s AND password = MD5(%s)'
+	cursor.execute(query, (airline, username, password))
 	data = cursor.fetchone()
 	cursor.close()
 	error = None
@@ -179,7 +179,7 @@ def astaff_login_auth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or username'
-		return render_template('astaff_login.html', error=error, placeholder="username", header="Airline Staff Login")
+		return render_template('astaff_login.html', error=error)
 
 #Define route for customer register
 @app.route('/cus_register', methods=['GET', 'POST'])
@@ -259,9 +259,15 @@ def agent_register_auth():
 @app.route('/astaff_register_auth', methods=['GET', 'POST'])
 def astaff_register_auth():
 	username = request.form['username']
+	password = request.form['password']
+	first_name = request.form['first_name']
+	last_name = request.form['last_name']
+	date_of_birth = request.form['date_of_birth']
+	airline = request.form['airline']
+
 	cursor = conn.cursor()
-	query = 'SELECT * FROM airline_staff WHERE username = %s'
-	cursor.execute(query, (username))
+	query = 'SELECT * FROM airline_staff WHERE username = %s AND airline = %s'
+	cursor.execute(query, (username, airline))
 	data = cursor.fetchone()
 	error = None
 	if(data):
@@ -269,12 +275,9 @@ def astaff_register_auth():
 		error = "This user already exists"
 		return render_template('astaff_register.html', error = error)
 	else:
-		airline_staff = request.form['airline_staff']
-		password = request.form['password']
-		
-		ins = '''INSERT INTO airline_staff (username,password,airline_staff)
-				 VALUES(%s,MD5(%s),%s)'''
-		cursor.execute(ins, (username,password,airline_staff))
+		ins = '''INSERT INTO airline_staff (airline,username,password,first_name,last_name,date_of_birth)
+				 VALUES(%s, %s,MD5(%s),%s,%s,%s)'''
+		cursor.execute(ins, (airline,username,password,first_name,last_name,date_of_birth))
 		conn.commit()
 		cursor.close()
 		return redirect('/astaff_login')   
@@ -304,35 +307,90 @@ def cus_home():
 def agent_home():
 	email = session['username']
 	cursor = conn.cursor()
-	query = '''SELECT * 
-			   FROM booking_agent JOIN agent_purchase ON (booking_agent.email = agent_purhase.agent_email) JOIN ticket ON (ticket.ID = agent_purchase.ticket_ID) NATURAL JOIN flight_expanded WHERE agent_email = %s AND departure_date >= CURDATE()
-			   ORDER BY departure_date DESC,departure_time DESC'''
-	cursor.execute(query, (email))
-	data = cursor.fetchall()
-	booking_agent_ID = data[0]['booking_agent_ID']
+	query1 = '''SELECT * 
+			   FROM booking_agent
+			   WHERE email = %s'''
+	cursor.execute(query1, (email))
+	data1 = cursor.fetchall()
+
+	booking_agent_ID = data1[0]['booking_agent_ID']
+
+	query2 = '''SELECT customer.name AS name, customer.email AS email,COUNT(ticket_ID) AS num_tickets
+				FROM agent_purchase JOIN ticket ON (ticket_ID = ID) JOIN customer ON (customer.email = agent_purchase.customer_email)
+				WHERE agent_email = %s
+				GROUP BY customer.email
+				ORDER BY num_tickets DESC
+				LIMIT 5'''
+	
+	cursor.execute(query2, (email))
+	data2 = cursor.fetchall()
+	tickets = []
+	for line in data2:
+		tickets.append([line['name'] + " " + line['email'], line['num_tickets']])
+
+	query3 = '''SELECT customer.name AS name, customer.email AS email, IFNULL((0.1 * SUM(sold_price)), 0) AS commission
+				FROM agent_purchase JOIN ticket ON (ticket_ID = ID) JOIN customer ON (customer.email = agent_purchase.customer_email)
+				WHERE agent_email = %s
+				GROUP BY customer.email
+				ORDER BY commission DESC
+				LIMIT 5'''
+	cursor.execute(query3, (email))
+	data3 = cursor.fetchall()
+
+	commission = []
+	for line in data3:
+		commission.append([line['name'] + " " + line['email'], line['commission']])
+
 	cursor.close()
-	return render_template('agent_home.html', booking_agent_ID=booking_agent_ID, data=data)
+
+	start_date = date.today().strftime('%y-%m-%d')
+	end_date = '9999-99-99'
+
+	commission_end_date = start_date
+	commission_start_date = (date.today() - timedelta(days=30)).strftime('%y-%m-%d')
+
+	return render_template('agent_home.html', tickets=tickets, commission=commission, booking_agent_ID=booking_agent_ID, start_date=start_date, end_date=end_date, commission_start_date=commission_start_date, commission_end_date=commission_end_date)
+
+@app.route('/agent_flights', methods=['GET', 'POST'])
+def agent_flights():
+	email = session['username']
+	start_date = request.form['start_date']
+	end_date = request.form['end_date']
+
+	cursor = conn.cursor()
+	query = '''SELECT *
+			   FROM agent_purchase JOIN ticket ON (agent_purchase.ticket_ID = ticket.ID) JOIN flight_expanded ON (ticket.flight_number = flight_expanded.flight_number) JOIN customer ON (ticket.customer_email = customer.email)
+			   WHERE agent_email = %s AND departure_date >= %s AND departure_date <= %s
+			   ORDER BY departure_date ASC'''
+	cursor.execute(query, (email,start_date,end_date))
+	data = cursor.fetchall()
+
+	if end_date == '9999-99-99':
+		end_date = ''
+	return render_template('agent_flights.html', data=data, start_date=start_date, end_date=end_date)
+
+@app.route('/agent_commission', methods=['GET', 'POST'])
+def agent_commission():
+	email = session['username']
+	commission_start_date = request.form['commission_start_date']
+	commission_end_date = request.form['commission_end_date']
+
+	cursor = conn.cursor()
+	query = '''SELECT IFNULL(0.1 * SUM(sold_price), 0) as total, IFNULL(0.1 * AVG(sold_price), 0) AS average, COUNT(ticket_ID) AS num_tickets
+			   FROM agent_purchase JOIN ticket ON (agent_purchase.ticket_ID = ticket.ID)
+			   WHERE agent_email = %s AND purchase_date >= %s AND purchase_date <= %s'''
+	cursor.execute(query, (email,commission_start_date,commission_end_date))
+	data = cursor.fetchone()
+	return render_template('agent_commission.html', data=data, commission_start_date=commission_start_date, commission_end_date=commission_end_date)
 
 @app.route('/astaff_home')
 def astaff_home():
 	username = session['username']
 	cursor = conn.cursor()
-
-	query = '''SELECT *
-			   FROM airline_staff LEFT JOIN ticket ON (ticket.customer_email = customer.email) NATURAL LEFT JOIN flight_expanded
-			   WHERE customer.email = %s AND departure_date >= CURDATE()
-			   ORDER BY departure_date ASC,departure_time ASC'''
-	cursor.execute(query, (email))
-	data = cursor.fetchall()
-	if len(data) == 0:
-		query = '''SELECT *
-			   	   FROM customer LEFT JOIN ticket ON (ticket.customer_email = customer.email) NATURAL LEFT JOIN flight_expanded
-			   	   WHERE customer.email = %s'''
-		cursor.execute(query, (email))
-		data = cursor.fetchall()
-	name = data[0]['name']
+	# Design relevant queries and edit astaff_home.html as necessary
+	# You would need to get their first name to display as a welcome
 	cursor.close()
-	return render_template('astaff_home.html', name=name, data=data)
+	return render_template('astaff_home.html', first_name=first_name)
 
 @app.route('/purchase_oneway_list', methods=['GET', 'POST'])
 def purchase_oneway_list():
