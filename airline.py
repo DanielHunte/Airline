@@ -812,6 +812,44 @@ def astaff_home():
 	query2 = '''SELECT first_name FROM airline_staff WHERE username = %s AND airline = %s'''
 	cursor.execute(query2, (username,airline))
 	first_name = cursor.fetchone()
+
+	query3 = '''SELECT flight_expanded.arrival_city AS city, COUNT(ticket.ID) AS num_tickets
+				FROM ticket JOIN flight_expanded ON ((ticket.airline,ticket.flight_number) = (flight_expanded.airline,flight_expanded.flight_number))
+				WHERE ticket.airline = %s AND ticket.purchase_date BETWEEN (CURDATE() - INTERVAL 1 YEAR) AND CURDATE()
+				GROUP BY city
+				LIMIT 3'''
+	cursor.execute(query3, (airline))
+	top_destination = cursor.fetchall()
+	
+	query4 = '''SELECT booking_agent.email AS email, booking_agent.booking_agent_ID as booking_agent_ID, COUNT(ticket.ID) AS num_tickets
+				FROM booking_agent JOIN agent_purchase ON (booking_agent.email = agent_purchase.agent_email) JOIN ticket ON (agent_purchase.ticket_ID = ticket.ID)
+				WHERE ticket.airline = %s
+				GROUP BY booking_agent.email
+				ORDER BY num_tickets DESC
+				LIMIT 5'''
+	cursor.execute(query4, (airline))
+	agents = cursor.fetchall()
+
+	query5 = '''SELECT booking_agent.email AS email, booking_agent.booking_agent_ID as booking_agent_ID, SUM(0.1 * sold_price) AS commission
+				FROM booking_agent JOIN agent_purchase ON (booking_agent.email = agent_purchase.agent_email) JOIN ticket ON (agent_purchase.ticket_ID = ticket.ID)
+				WHERE ticket.airline = %s
+				GROUP BY booking_agent.email
+				ORDER BY commission DESC
+				LIMIT 5'''
+	cursor.execute(query5, (airline))
+	agents_commission = cursor.fetchall()
+
+	query6 = '''SELECT SUM(ticket.sold_price) AS total
+				FROM cus_purchase JOIN ticket ON (cus_purchase.ticket_ID = ticket.ID)
+				WHERE ticket.airline = %s'''
+	cursor.execute(query6, (airline))
+	cus_sales = cursor.fetchone()['total']
+	
+	query7 = '''SELECT SUM(ticket.sold_price) AS total
+				FROM agent_purchase JOIN ticket ON (agent_purchase.ticket_ID = ticket.ID)
+				WHERE ticket.airline = %s'''
+	cursor.execute(query7, (airline))
+	agent_sales = cursor.fetchone()['total']
 	cursor.close()
 
 	start_date = date.today().strftime('%y-%m-%d')
@@ -822,9 +860,7 @@ def astaff_home():
 
 	from_home = True
 
-	return render_template('astaff_home.html', data=data, first_name=first_name['first_name'], start_date=start_date, end_date=end_date, from_home=from_home, report_start_date=report_start_date, report_end_date=report_end_date)
-
-#Airline Staff use cases:#
+	return render_template('astaff_home.html', data=data, first_name=first_name['first_name'], start_date=start_date, end_date=end_date, from_home=from_home, report_start_date=report_start_date, report_end_date=report_end_date, top_destination=top_destination, agents=agents, agents_commission=agents_commission, cus_sales=cus_sales, agent_sales=agent_sales)
 
 @app.route('/view_flights', methods=['GET', 'POST'])
 def view_flights():
@@ -858,7 +894,6 @@ def view_flights():
 	cursor.close()
 	return render_template('view_flights.html', data=data, start_date=start_date, end_date=end_date, from_home=False)
 
-
 @app.route('/view_customers', methods=['GET', 'POST'])
 def view_customers():
 	airline = session['airline']
@@ -871,10 +906,6 @@ def view_customers():
 	data = cursor.fetchall()
 	cursor.close()
 	return render_template('view_customers.html',data=data)
-
-
-
-#5. Create new flights: He or she creates a new flight, providing all the needed data, via forms. The application should prevent unauthorized users from doing this action. Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days.'''
 
 @app.route('/create_flight_form', methods=['GET', 'POST'])
 def create_flight_form():
@@ -993,8 +1024,6 @@ def view_booking_agents():
     cursor.execute(queryMonth, (booking_agent_id))
     cursor.execute(queryYear, (booking_agent_id))
 
-#11. View frequent customers: Airline Staff will also be able to see the most frequent customer within the last year. In addition, Airline Staff will be able to see a list of all flights a particular Customer has taken only on that particular airline.'''
-#what should we define as a frequent customer? right now i have it as top 10 customers
 @app.route('/customer_flights', methods=['GET', 'POST'])
 def customer_flights():
 	airline = session['airline']
@@ -1007,8 +1036,6 @@ def customer_flights():
 	data = cursor.fetchall()
 	return render_template('customer_flights.html', data=data, cus_email=cus_email)
     
-
-#12. View reports: Total amounts of ticket sold based on range of dates/last year/last month etc. Month wise tickets sold in a bar chart.
 @app.route('/view_report', methods=['GET', 'POST'])
 def view_port():
 	airline = session['airline']
@@ -1035,39 +1062,6 @@ def view_port():
 		result.append([str(line['month']) + "/" + str(line['year']), line['total']])
 	
 	return render_template('view_report.html', total=total, result=result, start_date=start_date, end_date=end_date)
- 
-#13. Comparison of Revenue earned: Draw a pie chart for showing total amount of revenue earned from direct sales
-#(when customer bought tickets without using a booking agent) and total amount of revenue earned from indirect sales
-#(when customer bought tickets using booking agents) in the last month and last year.
-@app.route('/compare_revenue', methods=['GET', 'POST'])
-def compare_revenue():
-    cursor = conn.cursor()
-    #draw pie chart -- excel or html?
-    queryMonthCus = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == NULL
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -30 DAY)'''
-    queryYearCus = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == NULL
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
-
-    queryMonthAgent = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == IS NOT NULL
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -30 DAY)'''
-    queryYearAgent = '''SUM(sold_price) FROM tickets WHERE (airline = %s) AND booking_agent_id == IS NOT NULL
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
-    cursor.execute(queryMonthCus, (tickets))
-    cursor.execute(queryYearCus, (tickets))
-    cursor.execute(queryMonthAgent, (tickets))
-    cursor.execute(queryYearAgent, (tickets))
-
-#14. View Top destinations: Find the top 3 most popular destinations for last 3 months and last year (based on tickets already sold).
-@app.route('/top_popular_destinations', methods=['GET', 'POST']) #remove post
-def top_popular_destinations():
-    cursor = conn.cursor()
-    queryMonth = '''SELECT TOP (3) city FROM arrival_s FROM ticket NATURAL JOIN flight WHERE (airline = %s) AND flight_number
-     ORDER BY commission
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -3 MONTHS)'''
-    queryYear = '''SELECT TOP (5) WITH TIES FROM booking_agent_id WHERE (airline = %s) ORDER BY commission
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
-    cursor.execute(queryMonth, (booking_agent_id))
-    cursor.execute(queryYear, (booking_agent_id))
 
 
 #THIS LOGOUT PAGE CAN BE USED BY ALL THREE ACCOUNT TYPES
@@ -1082,13 +1076,18 @@ app.secret_key = 'some key that you will never guess'
 #for changes to go through, TURN OFF FOR PRODUCTION
 if __name__ == "__main__":
 	cursor = conn.cursor()
-	query = '''CREATE OR REPLACE VIEW flight_expanded AS
-					SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price,IF(number_of_passengers < 0.7*number_of_seats, base_price, 1.2*base_price) AS sale_price,number_of_seats,number_of_passengers
-						FROM (SELECT * FROM (SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price
+	query = '''CREATE VIEW IF NOT EXISTS flight_expanded AS
+					WITH flight_city AS
+						(SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price
 						FROM flight JOIN (SELECT name AS departure_airport_name, city AS departure_city FROM airport) as s JOIN (SELECT name AS arrival_airport_name, city AS arrival_city FROM airport) as t
-						WHERE departure_airport = s.departure_airport_name AND arrival_airport = t.arrival_airport_name) AS s JOIN (SELECT ID,airline AS al,number_of_seats FROM airplane) AS t ON (s.airplane_ID = t.ID AND s.airline = t.al)) AS u JOIN (SELECT flight_number as flight_num,airline AS airl,IFNULL(COUNT(ticket.ID),0) as number_of_passengers
+						WHERE departure_airport = s.departure_airport_name AND arrival_airport = t.arrival_airport_name)
+						,
+						flight_size AS
+						(SELECT flight_number as flight_num,airline AS airl,IFNULL(COUNT(ticket.ID),0) as number_of_passengers
 						FROM flight NATURAL LEFT JOIN ticket 
-						GROUP BY flight_number,airline) AS flight_size
+						GROUP BY flight_number,airline)
+					SELECT flight_number,airline,airplane_id,departure_date,departure_time,arrival_date,arrival_time,departure_airport,departure_city,arrival_airport,arrival_city,status,base_price,IF(number_of_passengers < 0.7*number_of_seats, base_price, 1.2*base_price) AS sale_price,number_of_seats,number_of_passengers
+						FROM (SELECT * FROM flight_city AS s JOIN (SELECT ID,airline AS al,number_of_seats FROM airplane) AS t ON (s.airplane_ID = t.ID AND s.airline = t.al)) AS u JOIN flight_size
 						ON (flight_size.flight_num = u.flight_number AND flight_size.airl = u.airline)'''
 	cursor.execute(query)
 	cursor.close()

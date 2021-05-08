@@ -8,6 +8,58 @@
 		<input type="text" name="cus_email" placeholder="Customer Email">
 		<button type="view" class="btn-link" >Search Customer Flights</button>
 	</form><br><br>
+
+	<h3>Revenue from Booking Agents is ${{'%0.2f' % agent_sales|float}}</h3>
+	<h3>Revenue from Customers is ${{'%0.2f' % cus_sales|float}}</h3>
+	<h3>Top destinations for the past year</h3>
+	<style type="text/css">
+		table, th, td{
+			border: 1px solid black;
+		}
+	</style>
+	<table>
+		<th>Destination</th>
+		<th>Tickets Sold</th>
+	{% for line in top_destination %}
+		<tr>
+			<td>{{line['city']}}</td>
+			<td>{{line['num_tickets']}}</td>
+		</tr>
+	{% endfor %}
+	</table>
+
+	<h3>Top 5 Booking Agents Based on Tickets Sold</h3>
+	<style type="text/css">
+		table, th, td{
+			border: 1px solid black;
+		}
+	</style>
+	<table>
+		<th>Booking Agent</th>
+		<th>Tickets Sold</th>
+	{% for line in agents %}
+		<tr>
+			<td>{{line['booking_agent_ID']}} <br> {{line['email']}}</td>
+			<td>{{line['num_tickets']}}</td>
+		</tr>
+	{% endfor %}
+	</table>
+	<h3>Top 5 Booking Agents Based on Commision</h3>
+	<style type="text/css">
+		table, th, td{
+			border: 1px solid black;
+		}
+	</style>
+	<table>
+		<th>Booking Agent</th>
+		<th>Commision</th>
+	{% for line in agents_commission %}
+		<tr>
+			<td>{{line['booking_agent_ID']}} <br> {{line['email']}}</td>
+			<td>${{'%0.2f' % line['commission']|float}}</td>
+		</tr>
+	{% endfor %}
+	</table><br>
 	<form action="/create_flight_form" method="POST" style='display:inline;'>
 		<button type="view" class="btn-link" >Create New Flight</button>
 	</form>
