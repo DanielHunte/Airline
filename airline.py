@@ -864,10 +864,8 @@ def astaff_home():
 
 @app.route('/view_flights', methods=['GET', 'POST'])
 def view_flights():
-	airline = session['airline']
 	cursor = conn.cursor()
 
-    #custom view:
 	from_home = request.form['from_home']
 	data = 0
 
@@ -1011,18 +1009,6 @@ def view_ratings():
 	print("data:", data, flush=True)
 	return render_template('view_ratings.html', data=data, flight_number=flight_number)
 
-
-#10. View all the booking agents: Top 5 booking agents based on number of tickets sales for the past month and past year. Top 5 booking agents based on the amount of commission received for the last year.'''
-@app.route('/view_booking_agents', methods=['GET'])
-def view_booking_agents():
-    cursor = conn.cursor()
-    #we need to add commission, but how do we add this with timelines?
-    queryMonth = '''CREATE VIEW as SELECT TOP (5) WITH TIES FROM booking_agent_id WHERE (airline = %s) ORDER BY commission
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -30 DAY)'''
-    queryYear = '''SELECT TOP (5) WITH TIES FROM booking_agent_id WHERE (airline = %s) ORDER BY commission
-    BETWEEN DATE_ADD(GETDATE(), INTERVAL -1 YEAR)'''
-    cursor.execute(queryMonth, (booking_agent_id))
-    cursor.execute(queryYear, (booking_agent_id))
 
 @app.route('/customer_flights', methods=['GET', 'POST'])
 def customer_flights():
