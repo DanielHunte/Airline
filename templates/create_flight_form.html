@@ -1,0 +1,26 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Creating New Flight</h1>
+<form action="/create_flight" method="POST">
+	<input type="text" name = "flight_number" placeholder="Flight Number"/></br>
+	<input type="text" name = "departure_airport" placeholder="Departure Airport"/></br>
+	<input type="text" name = "departure_date" placeholder="Departure Date" onfocus="(this.type='date')"/></br>
+	<input type="text" name = "departure_time" placeholder="Departure Time"/></br>
+	<input type="text" name = "arrival_airport" placeholder="Arrival Airport"/></br>
+	<input type="text" name = "arrival_date" placeholder="Arrival Date" onfocus="(this.type='date')"/></br>
+	<input type="text" name = "arrival_time" placeholder="Arrival Time"/></br>
+	<input type="text" name="base_price" placeholder="Base Price"></br>
+    <input type="text" name="status" placeholder="Status"></br>
+    <input type="text" name="airplane_id" placeholder="Airplane ID"></br><br>
+	<button type="view" class="btn-link" >Create Flight</button>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form><br>
+<form>
+	<input type="submit" value = "Go back" formaction="/astaff_home"/>
+</form>
+</body>
+</html>

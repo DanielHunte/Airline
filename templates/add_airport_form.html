@@ -1,0 +1,18 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Creating New Airport</h1>
+<form action="/add_airport" method="POST">
+	<input type="text" name = "name" placeholder="Name"/></br>
+	<input type="text" name = "city" placeholder="City"/></br><br>
+	<button type="view" class="btn-link" >Create Flight</button>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form><br>
+<form>
+	<input type="submit" value = "Go back" formaction="/astaff_home"/>
+</form>
+</body>
+</html>

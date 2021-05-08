@@ -1,0 +1,30 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>List ratings for Flight {{flight_number}} </h1>
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+    <th>Rating</th>
+	<th>Comment</th>
+
+{% for line in data %}
+	<tr>
+		<td>{{line['rate']}}</td>
+        <td>{{line['comment']}}</td>
+	</tr>
+{% endfor %}
+</table>
+<form>
+    <input type="submit" value = "Go back" formaction="/astaff_home"/>
+</form>
+
+</body>
+
+</html>

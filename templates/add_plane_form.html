@@ -1,0 +1,18 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Creating New Flight</h1>
+<form action="/add_plane" method="POST">
+	<input type="text" name = "id" placeholder="Airplane ID"/></br>
+	<input type="text" name = "number_of_seats" placeholder="Number of Seats"/></br>
+	<button type="view" class="btn-link" >Create Flight</button>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form><br>
+<form>
+	<input type="submit" value = "Go back" formaction="/astaff_home"/>
+</form>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Welcome</h1>
+	<h2>From {{start_date}} to {{end_date}}</h2>
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+	<th>Flight No</th>
+	<th>Status</th>
+	<th>Leaving from</th>
+	<th>Going to</th>
+	<th>Departure Date</th>
+	<th>Arrival Date</th>
+
+{% for line in data %}
+	<tr>
+		<td>{{line['flight_number']}}</td>
+		<td>{{line['status']}}</td>
+		<td>{{line['departure_city']}} ({{line['departure_airport']}})</td>
+		<td>{{line['arrival_city']}} ({{line['arrival_airport']}})</td>
+		<td>{{line['departure_date']}}<br>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}<br>{{line['arrival_time']}}</td>
+		<td>
+			<form action="/view_customers" method="POST">
+				<input type="submit" value = "View Customers" />
+				<input type="hidden" name="flight_number" value="{{line['flight_number']}}">
+			</form>
+		</td>
+		<td>
+			<form action="/view_ratings" method="POST">
+				<input type="submit" value = "Ratings" />
+				<input type="hidden" name="flight_number" value="{{line['flight_number']}}">
+			</form>
+		</td>
+		<td>
+			<form action="/change_status_form" method="POST">
+				<input type="submit" value = "Change Status" />
+				<input type="hidden" name="flight_number" value="{{line['flight_number']}}">
+				<input type="hidden" name="curr_status" value="{{line['status']}}">
+			</form>
+		</td>
+
+	</tr>
+{% endfor %}
+</table>
+<h3>Flight Search</h3>
+<form action="/view_flights" method="POST">
+	<input type="text" name = "start_date" placeholder="From" onfocus="(this.type='date')" required/>
+	<input type="text" name = "end_date" placeholder="To" onfocus="(this.type='date')" required/>
+	<input type="hidden" name="from_home" value="{{from_home}}">
+	<input type="submit" value = "Search"/>
+</form>
+
+
+<form>
+	<input type="submit" value = "Go back" formaction="/astaff_home"/>
+</form>
+
+</body>
+
+
+</html>

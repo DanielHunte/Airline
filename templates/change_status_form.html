@@ -1,0 +1,18 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Updating Flight {{flight_number}} with Current Status "{{curr_status}}"</h1>
+<form action="/change_status" method="POST">
+	<input type="hidden" name="flight_number" value="{{flight_number}}">
+	<input type="text" name = "status" placeholder="New Status"/></br><br>
+	<button type="view" class="btn-link" >Change Status</button>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form><br>
+<form>
+	<input type="submit" value = "Go back" formaction="/astaff_home"/>
+</form>
+</body>
+</html>

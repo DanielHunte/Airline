@@ -2,41 +2,36 @@
 <head>
 </head>
 <body>
-	<h1>Welcome {{firts_name}}</h1>
-	<h2>View Upcoming Flights</h2>
-
-<style type="text/css">
-	table, th, td{
-		border: 1px solid black;
-	}
-</style>
-
-<form action="/view_flights" method="POST" style='display:inline;'>
-	<input type="submit" value = "View Flights"/>
-	<input type="hidden" id="start_date" name="start_date">
-	<input type="hidden" id="end_date" name="end_date">
-</form><br>
-
-<form action="/rate_flight_list" method="POST" style='display:inline;'>
-	<input type="submit" value = "Rate Previous Flights"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</form>
-<form action="/track_spending" method="POST" style='display:inline;'>
-	<input type="submit" value = "Track Spending"/>
-	<input type="hidden" id="start_date" name="start_date">
-	<input type="hidden" id="end_date" name="end_date">
-</form><br>
-<h3>Flight Search</h3>
-	<form action="/purchase_oneway_list" method="POST">
-		<input type="text" name = "departing_from" placeholder="Leaving from" required/>
-		<input type="text" name = "departing_to" placeholder="Going to" required/>
-		<input type="text" name = "departure_date" placeholder="Departing date" onfocus="(this.type='date')"/>
-		<input type="text" name = "returning_date" placeholder="Returning date" onfocus="(this.type='date')"/></br></br>
-		<input type="submit" value = "One Way"/>
-		<input type="submit" value = "Round Trip" formaction="/departing_trip_purchase"/>
+	<h1>Welcome {{first_name}}</h1>
+	<div>Most Frequent Customer is {{data['name'] + " " + data['email']}}</div><br>
+	<form action="/customer_flights" method="POST" style='display:inline;'>
+		<input type="text" name="cus_email" placeholder="Customer Email">
+		<button type="view" class="btn-link" >Search Customer Flights</button>
+	</form><br><br>
+	<form action="/create_flight_form" method="POST" style='display:inline;'>
+		<button type="view" class="btn-link" >Create New Flight</button>
 	</form>
-<form>
-	<input type="submit" value = "Logout" formaction="/logout"/>
-</form>
+	<form action="/add_plane_form" method="POST" style='display:inline;'>
+		<button type="view" class="btn-link" >Add Airplane</button>
+	</form>
+	<form action="/add_airport_form" method="POST" style='display:inline;'>
+		<button type="view" class="btn-link" >Add Airport</button>
+	</form>
+	<form action="/view_flights" method="POST" style='display:inline;'>
+		<input type="hidden" name="start_date" value="{{start_date}}">
+		<input type="hidden" name="end_date" value="{{end_date}}">
+		<input type="hidden" name="from_home" value="{{from_home}}">
+		<input type="submit" value = "View Flights"/>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	</form>
+	<form action="/view_report" method="POST" style='display:inline;'>
+		<input type="hidden" name="start_date" value="{{report_start_date}}">
+		<input type="hidden" name="end_date" value="{{report_end_date}}">
+		<input type="hidden" name="from_home" value="{{from_home}}">
+		<input type="submit" value = "View Report"/>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	</form><br><br>
+	<form>
+		<input type="submit" value = "Logout" formaction="/logout"/>
+	</form>
 
 </body>
 

@@ -1,0 +1,30 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>List of Customers on flight: </h1>
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+    <th>Email</th>
+	<th>Name</th>
+
+{% for line in data %}
+	<tr>
+		<td>{{line['name']}}</td>
+        <td>{{line['email']}}</td>
+	</tr>
+{% endfor %}
+</table>
+<form>
+    <input type="submit" value = "Go back" formaction="/astaff_home"/>
+</form>
+
+</body>
+
+</html>
